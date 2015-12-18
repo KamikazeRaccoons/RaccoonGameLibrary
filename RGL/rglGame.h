@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
+#include "rglGameState.h"
+#include "rglGameStateMachine.h"
 
 #ifdef RGL_EXPORTS
 #define RGL_GAME_API __declspec(dllexport)
@@ -21,6 +23,8 @@ private:
 	SDL_Window* m_pWindow;
 	SDL_Renderer* m_pRenderer;
 
+	rglGameStateMachine* m_pGameStateMachine;
+
 	rglGame() : m_running(false) { }
 	~rglGame() { }
 
@@ -36,12 +40,13 @@ public:
 	RGL_GAME_API void setFrameRate(double frameRate);
 	RGL_GAME_API double getFrameRate();
 
+	RGL_GAME_API SDL_Window* getWindow();
 	RGL_GAME_API SDL_Renderer* getRenderer();
 
-	RGL_GAME_API bool run(std::string title, int width, int height, bool fullscreen = false,
-		double frameRate = 60.0);
+	RGL_GAME_API rglGameStateMachine* getGameStateMachine();
 
-	// TODO: Implement the input handler.
+	RGL_GAME_API bool run(std::string title, int width, int height, rglGameState* pInitState, bool fullscreen = false,
+		double frameRate = 60.0);
 
 	RGL_GAME_API void quit();
 

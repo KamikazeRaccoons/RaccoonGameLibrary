@@ -8,12 +8,16 @@
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+
 // Windows Header Files:
 #include <windows.h>
 
+// Standard Library Items:
+#include <iostream>
 #include <string>
 #include <map>
 #include <vector>
 
+// SDL Header Files:
 #include <SDL.h>
 #include <SDL_image.h>

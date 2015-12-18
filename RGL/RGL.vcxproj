@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -56,11 +56,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;RGL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -85,9 +86,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="rglDebugger.h" />
     <ClInclude Include="rglGame.h" />
     <ClInclude Include="rglGameActor.h" />
     <ClInclude Include="rglGameObject.h" />
+    <ClInclude Include="rglGameState.h" />
+    <ClInclude Include="rglGameStateMachine.h" />
+    <ClInclude Include="rglInputHandler.h" />
     <ClInclude Include="rglObjectParams.h" />
     <ClInclude Include="rglTextureManager.h" />
     <ClInclude Include="rglVector2.h" />

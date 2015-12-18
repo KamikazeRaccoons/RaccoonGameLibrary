@@ -1,15 +1,15 @@
 #include <iostream>
 #include <rglGame.h>
+#include <rglDebugger.h>
+#include "InitState.h"
 
 int main(int argc, char** argv)
 {
-	if (rglGame::getInstance()->run("Example1", 640, 480))
+	// TODO: Thoroughly test everything.
+
+	if (!rglGame::getInstance()->run("Example1", 640, 480, new InitState()))
 	{
-		std::cout << "Finished!\n";
-	}
-	else
-	{
-		std::cout << "Could not initialize game.\n";
+		rglDebugger::log("Could not initialize game.\n", rglDebugger::ERROR);
 		system("PAUSE");
 	}
 

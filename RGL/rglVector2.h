@@ -17,6 +17,7 @@ private:
 
 public:
 
+	rglVector2() : m_x(0.0), m_y(0.0) { };
 	rglVector2(double x, double y) : m_x(x), m_y(y) { }
 
 	RGL_VECTOR2_API void setX(double x);

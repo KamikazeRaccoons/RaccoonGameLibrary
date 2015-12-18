@@ -3,8 +3,12 @@
 
 #include "stdafx.h"
 #include "rglGame.h"
+#include "rglInputHandler.h"
 #include "rglTextureManager.h"
+#include "rglDebugger.h"
 #include "rglVector2.h"
+#include "rglGameState.h"
+#include "rglGameStateMachine.h"
 #include "rglObjectParams.h"
 #include "rglGameObject.h"
 #include "rglGameActor.h"
@@ -21,9 +25,19 @@ rglGame* rglGame::getInstance()
 	return m_pInstance;
 }
 
+SDL_Window* rglGame::getWindow()
+{
+	return m_pWindow;
+}
+
 SDL_Renderer* rglGame::getRenderer()
 {
 	return m_pRenderer;
+}
+
+rglGameStateMachine* rglGame::getGameStateMachine()
+{
+	return m_pGameStateMachine;
 }
 
 void rglGame::setFrameRate(double frameRate)
@@ -36,23 +50,21 @@ double rglGame::getFrameRate()
 	return m_frameRate;
 }
 
-bool rglGame::run(std::string title, int width, int height, bool fullscreen, double frameRate)
+bool rglGame::run(std::string title, int width, int height, rglGameState* pInitState, bool fullscreen, double frameRate)
 {
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+	if (pInitState == 0 ||
+		SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
+		(m_pWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
+		fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN)) == 0 ||
+		(m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0)) == 0)
 		return false;
-
-	if ((m_pWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
-		fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN)) == 0)
-		return false;
-	
-	if ((m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0)) == 0)
-		return false;
-
-	SDL_SetRenderDrawColor(m_pRenderer, 255, 255, 255, 255);
 
 	m_frameRate = 1.0 / frameRate;
 
 	m_running = true;
+
+	m_pGameStateMachine = new rglGameStateMachine();
+	m_pGameStateMachine->changeState(pInitState);
 
 	double updateTime = SDL_GetTicks() * 0.001;
 	double accumulatedTime = 0.0;
@@ -86,26 +98,20 @@ void rglGame::quit()
 
 void rglGame::pollEvents()
 {
-	SDL_Event event;
-	if (SDL_PollEvent(&event))
-	{
-		switch (event.type)
-		{
-		case SDL_QUIT:
-			m_running = false;
-			break;
-		}
-	}
+	rglInputHandler::getInstance()->update();
 }
 
 void rglGame::update()
 {
-	// TODO
+	m_pGameStateMachine->update();
 }
 
 void rglGame::render()
 {
+	SDL_SetRenderDrawColor(m_pRenderer, 255, 255, 255, 255);
 	SDL_RenderClear(m_pRenderer);
+
+	m_pGameStateMachine->render();
 
 	SDL_RenderPresent(m_pRenderer);
 }
@@ -115,6 +121,108 @@ void rglGame::clean()
 	SDL_DestroyRenderer(m_pRenderer);
 	SDL_DestroyWindow(m_pWindow);
 	SDL_Quit();
+}
+
+// rglInputHandler
+
+rglInputHandler* rglInputHandler::m_pInstance = 0;
+
+rglInputHandler::rglInputHandler()
+{
+	for (int i = 0; i < 3; i++)
+		m_mouseButtonStates.push_back(false);
+
+	m_pMousePosition = new rglVector2();
+}
+
+rglInputHandler* rglInputHandler::getInstance()
+{
+	if (m_pInstance == 0)
+		m_pInstance = new rglInputHandler();
+
+	return m_pInstance;
+}
+
+void rglInputHandler::onMouseButtonDown(SDL_Event& event)
+{
+	switch (event.button.button)
+	{
+	case SDL_BUTTON_LEFT:
+		m_mouseButtonStates[LEFT] = true;
+		break;
+	case SDL_BUTTON_MIDDLE:
+		m_mouseButtonStates[MIDDLE] = true;
+		break;
+	case SDL_BUTTON_RIGHT:
+		m_mouseButtonStates[RIGHT] = true;
+		break;
+	}
+}
+
+void rglInputHandler::onMouseButtonUp(SDL_Event& event)
+{
+	switch (event.button.button)
+	{
+	case SDL_BUTTON_LEFT:
+		m_mouseButtonStates[LEFT] = false;
+		break;
+	case SDL_BUTTON_MIDDLE:
+		m_mouseButtonStates[MIDDLE] = false;
+		break;
+	case SDL_BUTTON_RIGHT:
+		m_mouseButtonStates[RIGHT] = false;
+		break;
+	}
+}
+
+void rglInputHandler::onMouseMove(SDL_Event& event)
+{
+	m_pMousePosition->setX(event.motion.x);
+	m_pMousePosition->setY(event.motion.y);
+}
+
+bool rglInputHandler::getMouseButtonState(int buttonID)
+{
+	return m_mouseButtonStates[buttonID];
+}
+
+rglVector2* rglInputHandler::getMousePosition()
+{
+	return m_pMousePosition;
+}
+
+bool rglInputHandler::isKeyDown(SDL_Scancode key)
+{
+	if (m_pKeystates == 0)
+		return false;
+
+	return m_pKeystates[key] == 1 ? true : false;
+}
+
+void rglInputHandler::update()
+{
+	m_pKeystates = SDL_GetKeyboardState(0);
+	
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			rglGame::getInstance()->quit();
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			onMouseButtonDown(event);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			onMouseButtonUp(event);
+			break;
+		case SDL_MOUSEMOTION:
+			onMouseMove(event);
+			break;
+		}
+	}
 }
 
 // rglTextueManager
@@ -168,6 +276,35 @@ void rglTextureManager::drawFrame(std::string id, int x, int y, int width, int h
 	destRect.y = y;
 
 	SDL_RenderCopyEx(rglGame::getInstance()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, renderFlip);
+}
+
+// rglDebugger
+
+void rglDebugger::log(std::string message, rglDebugger::LogType logType)
+{
+#ifdef _DEBUG
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+	GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
+	WORD textColor;
+
+	switch (logType)
+	{
+	case rglDebugger::LogType::MESSAGE:
+		textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // White
+		break;
+	case rglDebugger::LogType::WARNING:
+		textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Yellow
+		break;
+	case rglDebugger::LogType::ERROR:
+		textColor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Red
+		break;
+	}
+
+	SetConsoleTextAttribute(hConsole, textColor);
+	std::cout << message << std::endl;
+	SetConsoleTextAttribute(hConsole, consoleInfo.wAttributes);
+#endif
 }
 
 // rglVector2
@@ -255,6 +392,48 @@ void rglVector2::normalize()
 
 	if (l > 0)
 		*this *= 1.0 / l;
+}
+
+// rglGameStateMachine
+
+void rglGameStateMachine::pushState(rglGameState* pGameState)
+{
+	m_gameStates.push_back(pGameState);
+	pGameState->onEnter();
+}
+
+void rglGameStateMachine::changeState(rglGameState* pGameState)
+{
+	if (!m_gameStates.empty() && m_gameStates.back()->getStateID() != pGameState->getStateID() && m_gameStates.back()->onExit())
+	{
+		delete m_gameStates.back();
+		m_gameStates.pop_back();
+	}
+	
+	m_gameStates.push_back(pGameState);
+
+	pGameState->onEnter();
+}
+
+void rglGameStateMachine::popState()
+{
+	if (m_gameStates.empty() || !m_gameStates.back()->onExit())
+		return;
+
+	delete m_gameStates.back();
+	m_gameStates.pop_back();
+}
+
+void rglGameStateMachine::update()
+{
+	if (!m_gameStates.empty())
+		m_gameStates.back()->update();
+}
+
+void rglGameStateMachine::render()
+{
+	if (!m_gameStates.empty())
+		m_gameStates.back()->render();
 }
 
 // rglObjectParams
