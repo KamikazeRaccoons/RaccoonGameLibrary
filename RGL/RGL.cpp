@@ -12,6 +12,7 @@
 #include "rglObjectParams.h"
 #include "rglGameObject.h"
 #include "rglGameActor.h"
+#include "rglButton.h"
 
 // rglGame
 
@@ -35,7 +36,7 @@ SDL_Renderer* rglGame::getRenderer()
 	return m_pRenderer;
 }
 
-rglGameStateMachine* rglGame::getGameStateMachine()
+shared_ptr<rglGameStateMachine> rglGame::getGameStateMachine()
 {
 	return m_pGameStateMachine;
 }
@@ -50,20 +51,20 @@ double rglGame::getFrameRate()
 	return m_frameRate;
 }
 
-bool rglGame::run(std::string title, int width, int height, rglGameState* pInitState, bool fullscreen, double frameRate)
+bool rglGame::run(string title, int width, int height, shared_ptr<rglGameState> pInitState, bool fullscreen, double frameRate)
 {
 	if (pInitState == 0 ||
 		SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
 		(m_pWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
 		fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN)) == 0 ||
-		(m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0)) == 0)
+		(m_pRenderer = (SDL_CreateRenderer(m_pWindow, -1, 0))) == 0)
 		return false;
 
 	m_frameRate = 1.0 / frameRate;
 
 	m_running = true;
 
-	m_pGameStateMachine = new rglGameStateMachine();
+	m_pGameStateMachine = make_shared<rglGameStateMachine>();
 	m_pGameStateMachine->changeState(pInitState);
 
 	double updateTime = SDL_GetTicks() * 0.001;
@@ -132,7 +133,7 @@ rglInputHandler::rglInputHandler()
 	for (int i = 0; i < 3; i++)
 		m_mouseButtonStates.push_back(false);
 
-	m_pMousePosition = new rglVector2();
+	m_pMousePosition = make_shared<rglVector2>();
 }
 
 rglInputHandler* rglInputHandler::getInstance()
@@ -186,7 +187,7 @@ bool rglInputHandler::getMouseButtonState(int buttonID)
 	return m_mouseButtonStates[buttonID];
 }
 
-rglVector2* rglInputHandler::getMousePosition()
+shared_ptr<rglVector2> rglInputHandler::getMousePosition()
 {
 	return m_pMousePosition;
 }
@@ -237,7 +238,7 @@ rglTextureManager* rglTextureManager::getInstance()
 	return m_pInstance;
 }
 
-bool rglTextureManager::load(std::string fileName, std::string id)
+bool rglTextureManager::load(string fileName, string id)
 {
 	SDL_Surface* pTempSurface = IMG_Load(fileName.c_str());
 
@@ -257,12 +258,18 @@ bool rglTextureManager::load(std::string fileName, std::string id)
 	return false;
 }
 
-void rglTextureManager::draw(std::string id, int x, int y, int width, int height, SDL_RendererFlip renderFlip)
+void rglTextureManager::unload(string id)
+{
+	SDL_DestroyTexture(m_textures[id]);
+	m_textures.erase(id);
+}
+
+void rglTextureManager::draw(string id, int x, int y, int width, int height, SDL_RendererFlip renderFlip)
 {
 	drawFrame(id, x, y, width, height, 0, 0, renderFlip);
 }
 
-void rglTextureManager::drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
+void rglTextureManager::drawFrame(string id, int x, int y, int width, int height, int currentRow, int currentFrame,
 								  SDL_RendererFlip renderFlip)
 {
 	SDL_Rect srcRect;
@@ -280,7 +287,7 @@ void rglTextureManager::drawFrame(std::string id, int x, int y, int width, int h
 
 // rglDebugger
 
-void rglDebugger::log(std::string message, rglDebugger::LogType logType)
+void rglDebugger::log(string message, rglDebugger::LogType logType)
 {
 #ifdef _DEBUG
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -302,7 +309,7 @@ void rglDebugger::log(std::string message, rglDebugger::LogType logType)
 	}
 
 	SetConsoleTextAttribute(hConsole, textColor);
-	std::cout << message << std::endl;
+	cout << message << endl;
 	SetConsoleTextAttribute(hConsole, consoleInfo.wAttributes);
 #endif
 }
@@ -396,49 +403,59 @@ void rglVector2::normalize()
 
 // rglGameStateMachine
 
-void rglGameStateMachine::pushState(rglGameState* pGameState)
+void rglGameStateMachine::pushState(shared_ptr<rglGameState> pGameState)
 {
-	m_gameStates.push_back(pGameState);
-	pGameState->onEnter();
+	m_gameStates.push_back(make_pair(ENTERING, pGameState));
 }
 
-void rglGameStateMachine::changeState(rglGameState* pGameState)
+void rglGameStateMachine::changeState(shared_ptr<rglGameState> pGameState)
 {
-	if (!m_gameStates.empty() && m_gameStates.back()->getStateID() != pGameState->getStateID() && m_gameStates.back()->onExit())
-	{
-		delete m_gameStates.back();
-		m_gameStates.pop_back();
-	}
+	if (!m_gameStates.empty() && m_gameStates.back().second->getStateID() != pGameState->getStateID())
+		m_gameStates.back().first = EXITING;
 	
-	m_gameStates.push_back(pGameState);
-
-	pGameState->onEnter();
+	m_gameStates.push_back(make_pair(ENTERING, pGameState));
 }
 
 void rglGameStateMachine::popState()
 {
-	if (m_gameStates.empty() || !m_gameStates.back()->onExit())
+	if (m_gameStates.empty())
 		return;
 
-	delete m_gameStates.back();
-	m_gameStates.pop_back();
+	m_gameStates.back().first = EXITING;
 }
 
 void rglGameStateMachine::update()
 {
-	if (!m_gameStates.empty())
-		m_gameStates.back()->update();
+	if (!m_gameStates.empty() && m_gameStates.back().first == ACTIVE)
+		m_gameStates.back().second->update();
+
+	for (unsigned int i = 0; i < m_gameStates.size();)
+	{
+		switch (m_gameStates[i].first)
+		{
+		case ENTERING:
+			m_gameStates[i].second->onEnter();
+			m_gameStates[i].first = ACTIVE;
+		case ACTIVE:
+			i++;
+			break;
+		case EXITING:
+			m_gameStates[i].second->onExit();
+			m_gameStates.erase(m_gameStates.begin() + i);
+			break;
+		}
+	}
 }
 
 void rglGameStateMachine::render()
 {
 	if (!m_gameStates.empty())
-		m_gameStates.back()->render();
+		m_gameStates.back().second->render();
 }
 
 // rglObjectParams
 
-rglObjectParams::rglObjectParams(int x, int y, int width, int height, std::string textureID)
+rglObjectParams::rglObjectParams(int x, int y, int width, int height, string textureID)
 	: m_x(x), m_y(y), m_width(width), m_height(height), m_textureID(textureID)
 {
 }
@@ -463,14 +480,14 @@ int rglObjectParams::getHeight() const
 	return m_height;
 }
 
-std::string rglObjectParams::getTextureID() const
+string rglObjectParams::getTextureID() const
 {
 	return m_textureID;
 }
 
 // rglGameActor
 
-rglGameActor::rglGameActor(const rglObjectParams* pObjectParams)
+rglGameActor::rglGameActor(const shared_ptr<rglObjectParams> pObjectParams)
 	: rglGameObject(pObjectParams), m_position(pObjectParams->getX(), pObjectParams->getY()),
 	m_velocity(0, 0), m_acceleration(0, 0)
 {
@@ -493,4 +510,54 @@ void rglGameActor::draw()
 {
 	rglTextureManager::getInstance()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
 		m_width, m_height, m_currentRow, m_currentFrame);
+}
+
+// rglButton
+
+rglButton::rglButton(const shared_ptr<rglObjectParams> pObjectParams, void (*onClick)())
+	: rglGameActor(pObjectParams), m_onClick(onClick)
+{
+	m_currentFrame = MOUSE_AWAY;
+}
+
+void rglButton::update()
+{
+	shared_ptr<rglVector2> pMousePos = rglInputHandler::getInstance()->getMousePosition();
+
+	if (pMousePos->getX() < (m_position.getX() + m_width) &&
+		pMousePos->getX() > m_position.getX() &&
+		pMousePos->getY() < (m_position.getY() + m_height) &&
+		pMousePos->getY() > m_position.getY())
+	{
+		if (rglInputHandler::getInstance()->getMouseButtonState(rglInputHandler::LEFT))
+		{
+			if (!m_pressed)
+			{
+				m_currentFrame = MOUSE_PRESSED;
+
+				m_onClick();
+				
+				m_pressed = true;
+			}
+		}
+		else
+		{
+			m_pressed = false;
+			m_currentFrame = MOUSE_HOVERING;
+		}
+	}
+	else
+	{
+		m_currentFrame = MOUSE_AWAY;
+	}
+}
+
+void rglButton::draw()
+{
+	rglGameActor::draw();
+}
+
+void rglButton::clean()
+{
+	rglGameActor::clean();
 }

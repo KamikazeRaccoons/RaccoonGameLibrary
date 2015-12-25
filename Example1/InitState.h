@@ -1,6 +1,8 @@
 #pragma once
 
 #include <rglGameState.h>
+#include <rglGameObject.h>
+#include <rglDebugger.h>
 
 class InitState :
 	public rglGameState
@@ -8,6 +10,10 @@ class InitState :
 private:
 
 	static std::string m_stateID;
+
+	std::vector<shared_ptr<rglGameObject>> m_gameObjects;
+
+	static void onOtherStateClick();
 
 public:
 

@@ -13,6 +13,7 @@
 #include <windows.h>
 
 // Standard Library Items:
+#include <memory>
 #include <iostream>
 #include <string>
 #include <map>
@@ -21,3 +22,6 @@
 // SDL Header Files:
 #include <SDL.h>
 #include <SDL_image.h>
+
+// Using statements:
+using namespace std;

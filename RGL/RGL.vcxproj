@@ -86,6 +86,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="rglButton.h" />
     <ClInclude Include="rglDebugger.h" />
     <ClInclude Include="rglGame.h" />
     <ClInclude Include="rglGameActor.h" />

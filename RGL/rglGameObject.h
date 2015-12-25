@@ -13,7 +13,7 @@ class rglGameObject
 {
 protected:
 
-	rglGameObject(const rglObjectParams* pObjectParams) { }
+	rglGameObject(const shared_ptr<rglObjectParams> pObjectParams) { }
 	virtual ~rglGameObject() { }
 
 public:

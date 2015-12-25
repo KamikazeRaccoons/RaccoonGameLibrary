@@ -17,7 +17,7 @@ private:
 
 	std::vector<bool> m_mouseButtonStates;
 
-	rglVector2* m_pMousePosition;
+	shared_ptr<rglVector2> m_pMousePosition;
 
 	const Uint8* m_pKeystates;
 
@@ -40,7 +40,7 @@ public:
 	static RGL_INPUTHANDLER_API rglInputHandler* getInstance();
 
 	RGL_INPUTHANDLER_API bool getMouseButtonState(int buttonID);
-	RGL_INPUTHANDLER_API rglVector2* getMousePosition();
+	RGL_INPUTHANDLER_API shared_ptr<rglVector2> getMousePosition();
 
 	RGL_INPUTHANDLER_API bool isKeyDown(SDL_Scancode key);
 

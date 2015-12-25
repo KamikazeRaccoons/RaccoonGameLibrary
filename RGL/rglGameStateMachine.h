@@ -13,12 +13,22 @@ class rglGameStateMachine
 {
 private:
 
-	std::vector<rglGameState*> m_gameStates;
+	enum GameStateStatus
+	{
+		ACTIVE = 0,
+		ENTERING = 1,
+		EXITING = 2
+	};
+
+	vector<pair<GameStateStatus, shared_ptr<rglGameState>>> m_gameStates;
 
 public:
 
-	void RGL_GAMESTATEMACHINE_API pushState(rglGameState* pGameState);
-	void RGL_GAMESTATEMACHINE_API changeState(rglGameState* pGameState);
+	rglGameStateMachine() { }
+	~rglGameStateMachine() { };
+
+	void RGL_GAMESTATEMACHINE_API pushState(shared_ptr<rglGameState> pGameState);
+	void RGL_GAMESTATEMACHINE_API changeState(shared_ptr<rglGameState> pGameState);
 	void RGL_GAMESTATEMACHINE_API popState();
 
 	void RGL_GAMESTATEMACHINE_API update();

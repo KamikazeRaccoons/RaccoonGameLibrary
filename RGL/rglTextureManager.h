@@ -24,6 +24,7 @@ public:
 	static RGL_TEXTUREMANAGER_API rglTextureManager* getInstance();
 
 	RGL_TEXTUREMANAGER_API bool load(std::string fileName, std::string id);
+	RGL_TEXTUREMANAGER_API void unload(std::string id);
 	RGL_TEXTUREMANAGER_API void draw(std::string id, int x, int y, int width, int height, SDL_RendererFlip renderFlip = SDL_FLIP_NONE);
 	RGL_TEXTUREMANAGER_API void drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
 		SDL_RendererFlip renderFlip = SDL_FLIP_NONE);

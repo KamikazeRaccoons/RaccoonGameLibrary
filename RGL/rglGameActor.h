@@ -29,7 +29,7 @@ protected:
 
 public:
 
-	RGL_GAMEACTOR_API rglGameActor(const rglObjectParams* pObjectParams);
+	RGL_GAMEACTOR_API rglGameActor(const shared_ptr<rglObjectParams> pObjectParams);
 
 	virtual RGL_GAMEACTOR_API void update();
 	virtual RGL_GAMEACTOR_API void draw();

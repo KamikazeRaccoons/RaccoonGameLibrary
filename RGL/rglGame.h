@@ -23,7 +23,7 @@ private:
 	SDL_Window* m_pWindow;
 	SDL_Renderer* m_pRenderer;
 
-	rglGameStateMachine* m_pGameStateMachine;
+	shared_ptr<rglGameStateMachine> m_pGameStateMachine;
 
 	rglGame() : m_running(false) { }
 	~rglGame() { }
@@ -43,9 +43,9 @@ public:
 	RGL_GAME_API SDL_Window* getWindow();
 	RGL_GAME_API SDL_Renderer* getRenderer();
 
-	RGL_GAME_API rglGameStateMachine* getGameStateMachine();
+	RGL_GAME_API shared_ptr<rglGameStateMachine> getGameStateMachine();
 
-	RGL_GAME_API bool run(std::string title, int width, int height, rglGameState* pInitState, bool fullscreen = false,
+	RGL_GAME_API bool run(string title, int width, int height, shared_ptr<rglGameState> pInitState, bool fullscreen = false,
 		double frameRate = 60.0);
 
 	RGL_GAME_API void quit();
