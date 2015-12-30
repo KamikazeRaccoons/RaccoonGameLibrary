@@ -13,23 +13,20 @@ class rglGameStateMachine
 {
 private:
 
-	enum GameStateStatus
+	enum TransitionType
 	{
-		ACTIVE = 0,
-		ENTERING = 1,
-		EXITING = 2
+		PUSH = 0,
+		CHANGE = 1,
+		POP = 2
 	};
 
-	vector<pair<GameStateStatus, shared_ptr<rglGameState>>> m_gameStates;
-
-	bool m_polling;
-
-	RGL_GAMESTATEMACHINE_API void pollStateChanges();
+	vector<shared_ptr<rglGameState>> m_gameStates;
+	vector<pair<TransitionType, shared_ptr<rglGameState>>> m_queuedTransitions;
 
 public:
 
-	rglGameStateMachine() : m_polling(false) { }
-	~rglGameStateMachine() { };
+	rglGameStateMachine() { }
+	~rglGameStateMachine() { }
 
 	RGL_GAMESTATEMACHINE_API void pushState(shared_ptr<rglGameState> pGameState);
 	RGL_GAMESTATEMACHINE_API void changeState(shared_ptr<rglGameState> pGameState);

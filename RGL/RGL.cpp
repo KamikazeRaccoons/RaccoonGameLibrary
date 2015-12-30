@@ -405,79 +405,59 @@ void rglVector2::normalize()
 
 void rglGameStateMachine::pushState(shared_ptr<rglGameState> pGameState)
 {
-	if (m_polling)
-	{
-		rglDebugger::log("Cannot push state during state transition.", rglDebugger::ERROR);
-		return;
-	}
-
-	m_gameStates.push_back(make_pair(ENTERING, pGameState));
+	m_queuedTransitions.push_back(make_pair(PUSH, pGameState));
 }
 
 void rglGameStateMachine::changeState(shared_ptr<rglGameState> pGameState)
 {
-	if (m_polling)
-	{
-		rglDebugger::log("Cannot change state during state transition.", rglDebugger::ERROR);
-		return;
-	}
-
-	if (!m_gameStates.empty() && m_gameStates.back().second->getStateID() != pGameState->getStateID())
-		m_gameStates.back().first = EXITING;
-	
-	m_gameStates.push_back(make_pair(ENTERING, pGameState));
+	m_queuedTransitions.push_back(make_pair(CHANGE, pGameState));
 }
 
 void rglGameStateMachine::popState()
 {
-	if (m_polling)
-	{
-		rglDebugger::log("Cannot pop state during state transition.", rglDebugger::ERROR);
-		return;
-	}
-
-	if (m_gameStates.empty())
-		return;
-
-	m_gameStates.back().first = EXITING;
+	m_queuedTransitions.push_back(make_pair<TransitionType, shared_ptr<rglGameState>>(POP, 0));
 }
 
 void rglGameStateMachine::update()
 {
-	if (!m_gameStates.empty() && m_gameStates.back().first == ACTIVE)
-		m_gameStates.back().second->update();
+	if (!m_gameStates.empty())
+		m_gameStates.back()->update();
 
-	pollStateChanges();
+	for (unsigned int i = 0; i < m_queuedTransitions.size(); i++)
+	{
+		switch (m_queuedTransitions[i].first)
+		{
+		case PUSH:
+			m_gameStates.push_back(m_queuedTransitions[i].second);
+			m_gameStates.back()->onEnter();
+			break;
+		case CHANGE:
+			if (!m_gameStates.empty() && m_gameStates.back()->getStateID() != m_queuedTransitions[i].second->getStateID())
+			{
+				m_gameStates.back()->onExit();
+				m_gameStates.pop_back();
+			}
+
+			m_gameStates.push_back(m_queuedTransitions[i].second);
+			m_gameStates.back()->onEnter();
+			break;
+		case POP:
+			if (!m_gameStates.empty())
+			{
+				m_gameStates.back()->onExit();
+				m_gameStates.pop_back();
+			}
+			break;
+		}
+	}
+
+	m_queuedTransitions.clear();
 }
 
 void rglGameStateMachine::render()
 {
 	if (!m_gameStates.empty())
-		m_gameStates.back().second->render();
-}
-
-void rglGameStateMachine::pollStateChanges()
-{
-	m_polling = true;
-
-	for (unsigned int i = 0; i < m_gameStates.size();)
-	{
-		switch (m_gameStates[i].first)
-		{
-		case ENTERING:
-			m_gameStates[i].second->onEnter();
-			m_gameStates[i].first = ACTIVE;
-		case ACTIVE:
-			i++;
-			break;
-		case EXITING:
-			m_gameStates[i].second->onExit();
-			m_gameStates.erase(m_gameStates.begin() + i);
-			break;
-		}
-	}
-
-	m_polling = false;
+		m_gameStates.back()->render();
 }
 
 // rglObjectParams

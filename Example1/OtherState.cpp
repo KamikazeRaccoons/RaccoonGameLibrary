@@ -32,6 +32,7 @@ void OtherState::onEnter()
 	if (!rglTextureManager::getInstance()->load("assets/textures/InitState.png", "InitStateButton"))
 	{
 		rglDebugger::log("Could not load \"InitState.png\"", rglDebugger::ERROR);
+		rglGame::getInstance()->getGameStateMachine()->popState();
 		return;
 	}
 
