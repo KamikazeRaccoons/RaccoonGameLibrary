@@ -23,7 +23,7 @@ void OtherState::render()
 		m_gameObjects[i]->draw();
 }
 
-bool OtherState::onEnter()
+void OtherState::onEnter()
 {
 	rglDebugger::log("OtherState Entering...");
 
@@ -32,18 +32,16 @@ bool OtherState::onEnter()
 	if (!rglTextureManager::getInstance()->load("assets/textures/InitState.png", "InitStateButton"))
 	{
 		rglDebugger::log("Could not load \"InitState.png\"", rglDebugger::ERROR);
-		return false;
+		return;
 	}
 
 	int w, h;
 	SDL_GetWindowSize(rglGame::getInstance()->getWindow(), &w, &h);
 
 	m_gameObjects.push_back(make_shared<rglButton>(make_shared<rglObjectParams>(w / 2 - 32, h / 2 - 16, 64, 32, "InitStateButton"), &onInitStateClick));
-
-	return true;
 }
 
-bool OtherState::onExit()
+void OtherState::onExit()
 {
 	rglDebugger::log("OtherState Exiting...");
 
@@ -53,8 +51,6 @@ bool OtherState::onExit()
 	m_gameObjects.clear();
 
 	rglTextureManager::getInstance()->unload("InitStateButton");
-
-	return true;
 }
 
 std::string OtherState::getStateID() const

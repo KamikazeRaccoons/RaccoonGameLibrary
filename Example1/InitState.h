@@ -23,8 +23,8 @@ public:
 	virtual void update();
 	virtual void render();
 
-	virtual bool onEnter();
-	virtual bool onExit();
+	virtual void onEnter();
+	virtual void onExit();
 
 	virtual std::string getStateID() const;
 

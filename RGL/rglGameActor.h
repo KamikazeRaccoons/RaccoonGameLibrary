@@ -35,4 +35,8 @@ public:
 	virtual RGL_GAMEACTOR_API void draw();
 	virtual void clean() { }
 
+	RGL_GAMEACTOR_API rglVector2& getPosition();
+	RGL_GAMEACTOR_API int getWidth();
+	RGL_GAMEACTOR_API int getHeight();
+
 };

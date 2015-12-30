@@ -405,11 +405,23 @@ void rglVector2::normalize()
 
 void rglGameStateMachine::pushState(shared_ptr<rglGameState> pGameState)
 {
+	if (m_polling)
+	{
+		rglDebugger::log("Cannot push state during state transition.", rglDebugger::ERROR);
+		return;
+	}
+
 	m_gameStates.push_back(make_pair(ENTERING, pGameState));
 }
 
 void rglGameStateMachine::changeState(shared_ptr<rglGameState> pGameState)
 {
+	if (m_polling)
+	{
+		rglDebugger::log("Cannot change state during state transition.", rglDebugger::ERROR);
+		return;
+	}
+
 	if (!m_gameStates.empty() && m_gameStates.back().second->getStateID() != pGameState->getStateID())
 		m_gameStates.back().first = EXITING;
 	
@@ -418,6 +430,12 @@ void rglGameStateMachine::changeState(shared_ptr<rglGameState> pGameState)
 
 void rglGameStateMachine::popState()
 {
+	if (m_polling)
+	{
+		rglDebugger::log("Cannot pop state during state transition.", rglDebugger::ERROR);
+		return;
+	}
+
 	if (m_gameStates.empty())
 		return;
 
@@ -428,6 +446,19 @@ void rglGameStateMachine::update()
 {
 	if (!m_gameStates.empty() && m_gameStates.back().first == ACTIVE)
 		m_gameStates.back().second->update();
+
+	pollStateChanges();
+}
+
+void rglGameStateMachine::render()
+{
+	if (!m_gameStates.empty())
+		m_gameStates.back().second->render();
+}
+
+void rglGameStateMachine::pollStateChanges()
+{
+	m_polling = true;
 
 	for (unsigned int i = 0; i < m_gameStates.size();)
 	{
@@ -445,12 +476,8 @@ void rglGameStateMachine::update()
 			break;
 		}
 	}
-}
 
-void rglGameStateMachine::render()
-{
-	if (!m_gameStates.empty())
-		m_gameStates.back().second->render();
+	m_polling = false;
 }
 
 // rglObjectParams
@@ -485,6 +512,7 @@ string rglObjectParams::getTextureID() const
 	return m_textureID;
 }
 
+
 // rglGameActor
 
 rglGameActor::rglGameActor(const shared_ptr<rglObjectParams> pObjectParams)
@@ -510,6 +538,21 @@ void rglGameActor::draw()
 {
 	rglTextureManager::getInstance()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
 		m_width, m_height, m_currentRow, m_currentFrame);
+}
+
+rglVector2& rglGameActor::getPosition()
+{
+	return m_position;
+}
+
+int rglGameActor::getWidth()
+{
+	return m_width;
+}
+
+int rglGameActor::getHeight()
+{
+	return m_height;
 }
 
 // rglButton

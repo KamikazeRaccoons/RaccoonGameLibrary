@@ -22,15 +22,19 @@ private:
 
 	vector<pair<GameStateStatus, shared_ptr<rglGameState>>> m_gameStates;
 
+	bool m_polling;
+
+	RGL_GAMESTATEMACHINE_API void pollStateChanges();
+
 public:
 
-	rglGameStateMachine() { }
+	rglGameStateMachine() : m_polling(false) { }
 	~rglGameStateMachine() { };
 
-	void RGL_GAMESTATEMACHINE_API pushState(shared_ptr<rglGameState> pGameState);
-	void RGL_GAMESTATEMACHINE_API changeState(shared_ptr<rglGameState> pGameState);
-	void RGL_GAMESTATEMACHINE_API popState();
-
-	void RGL_GAMESTATEMACHINE_API update();
-	void RGL_GAMESTATEMACHINE_API render();
+	RGL_GAMESTATEMACHINE_API void pushState(shared_ptr<rglGameState> pGameState);
+	RGL_GAMESTATEMACHINE_API void changeState(shared_ptr<rglGameState> pGameState);
+	RGL_GAMESTATEMACHINE_API void popState();
+	
+	RGL_GAMESTATEMACHINE_API void update();
+	RGL_GAMESTATEMACHINE_API void render();
 };

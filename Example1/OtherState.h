@@ -10,7 +10,7 @@ private:
 
 	static std::string m_stateID;
 
-	std::vector<shared_ptr<rglGameObject>> m_gameObjects;
+	vector<shared_ptr<rglGameObject>> m_gameObjects;
 
 	static void onInitStateClick();
 
@@ -21,8 +21,8 @@ public:
 	virtual void update();
 	virtual void render();
 
-	virtual bool onEnter();
-	virtual bool onExit();
+	virtual void onEnter();
+	virtual void onExit();
 
 	virtual std::string getStateID() const;
 };

@@ -6,8 +6,6 @@
 
 int main(int argc, char** argv)
 {
-	// TODO: Code looks good. Push changes.
-
 	if (!rglGame::getInstance()->run("Example1", 640, 480, make_shared<InitState>()))
 	{
 		rglDebugger::log("Could not initialize game.\n", rglDebugger::ERROR);
