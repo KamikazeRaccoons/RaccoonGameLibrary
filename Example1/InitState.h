@@ -1,17 +1,16 @@
 #pragma once
 
-#include <rglGameState.h>
+#include <rglGUIState.h>
 #include <rglGameObject.h>
 #include <rglDebugger.h>
 
-class InitState :
-	public rglGameState
+class InitState : public rglGUIState
 {
 private:
 
-	static std::string m_stateID;
+	static string m_stateID;
 
-	std::vector<shared_ptr<rglGameObject>> m_gameObjects;
+	virtual void setCallbacks(const vector<Callback>& callbacks);
 
 	static void onOtherStateClick();
 
@@ -26,7 +25,7 @@ public:
 	virtual void onEnter();
 	virtual void onExit();
 
-	virtual std::string getStateID() const;
+	virtual string getStateID() const;
 
 };
 

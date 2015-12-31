@@ -25,11 +25,15 @@ protected:
 	int m_currentRow;
 	int m_currentFrame;
 
+	int m_numFrames;
+
 	std::string m_textureID;
 
 public:
 
-	RGL_GAMEACTOR_API rglGameActor(const shared_ptr<rglObjectParams> pObjectParams);
+	RGL_GAMEACTOR_API rglGameActor();
+
+	virtual RGL_GAMEACTOR_API void load(const shared_ptr<rglObjectParams> pObjectParams);
 
 	virtual RGL_GAMEACTOR_API void update();
 	virtual RGL_GAMEACTOR_API void draw();

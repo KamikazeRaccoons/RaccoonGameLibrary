@@ -13,13 +13,16 @@ class rglGameObject
 {
 protected:
 
-	rglGameObject(const shared_ptr<rglObjectParams> pObjectParams) { }
-	virtual ~rglGameObject() { }
+	rglGameObject() { }
 
 public:
+
+	virtual void load(const shared_ptr<rglObjectParams> pObjectParams) = 0;
 
 	virtual void update() = 0;
 	virtual void draw() = 0;
 	virtual void clean() = 0;
+
+	virtual ~rglGameObject() { }
 
 };

@@ -23,5 +23,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+// TinyXML2 Header Files:
+#include "tinyxml2.h"
+
 // Using statements:
 using namespace std;
+using namespace tinyxml2;

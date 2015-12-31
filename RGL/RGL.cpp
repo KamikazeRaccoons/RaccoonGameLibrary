@@ -9,7 +9,9 @@
 #include "rglVector2.h"
 #include "rglGameState.h"
 #include "rglGameStateMachine.h"
+#include "rglStateParser.h"
 #include "rglObjectParams.h"
+#include "rglObjectFactory.h"
 #include "rglGameObject.h"
 #include "rglGameActor.h"
 #include "rglButton.h"
@@ -63,6 +65,8 @@ bool rglGame::run(string title, int width, int height, shared_ptr<rglGameState> 
 	m_frameRate = 1.0 / frameRate;
 
 	m_running = true;
+
+	rglObjectFactory::getInstance()->registerType("rglButton", make_shared<rglButtonCreator>());
 
 	m_pGameStateMachine = make_shared<rglGameStateMachine>();
 	m_pGameStateMachine->changeState(pInitState);
@@ -432,8 +436,11 @@ void rglGameStateMachine::update()
 			m_gameStates.back()->onEnter();
 			break;
 		case CHANGE:
-			if (!m_gameStates.empty() && m_gameStates.back()->getStateID() != m_queuedTransitions[i].second->getStateID())
+			if (!m_gameStates.empty())
 			{
+				if (m_gameStates.back()->getStateID() == m_queuedTransitions[i].second->getStateID())
+					break;
+
 				m_gameStates.back()->onExit();
 				m_gameStates.pop_back();
 			}
@@ -460,10 +467,89 @@ void rglGameStateMachine::render()
 		m_gameStates.back()->render();
 }
 
+// rglStateParser
+
+void rglStateParser::parseTextures(XMLElement* pTextureRoot, vector<string>& textureIDs)
+{
+	for (XMLElement* e = pTextureRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+	{
+		if (e->Value() != string("Texture"))
+		{
+			rglDebugger::log("Unknown element: \"" + string(e->Value()) + "\".", rglDebugger::WARNING);
+			continue;
+		}
+
+		string filename = e->Attribute("filename");
+		string id = e->Attribute("ID");
+		textureIDs.push_back(id);
+
+		rglTextureManager::getInstance()->load(filename, id);
+	}
+}
+
+void rglStateParser::parseObjects(XMLElement* pStateRoot, vector<shared_ptr<rglGameObject>>& objects)
+{
+	for (XMLElement* e = pStateRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+	{
+		if (e->Value() != string("Object"))
+		{
+			rglDebugger::log("Unknown element: \"" + string(e->Value()) + "\".", rglDebugger::WARNING);
+			continue;
+		}
+
+		int x = e->IntAttribute("x");
+		int y = e->IntAttribute("y");
+		int width = e->IntAttribute("width");
+		int height = e->IntAttribute("height");
+		int numFrames = e->IntAttribute("numFrames");
+		int callbackID = e->IntAttribute("callbackID");
+		int animSpeed = e->IntAttribute("animSpeed");
+		string textureID = e->Attribute("textureID");
+
+		shared_ptr<rglGameObject> pGameObject = rglObjectFactory::getInstance()->create(e->Attribute("type"));
+		pGameObject->load(make_shared<rglObjectParams>(rglObjectParams(x, y, width, height, numFrames, textureID, callbackID, animSpeed)));
+		objects.push_back(pGameObject);
+	}
+}
+
+bool rglStateParser::parseState(const char* file, string stateID, vector<shared_ptr<rglGameObject>>& objects,
+		vector<string>& textureIDs)
+{
+	XMLDocument xmlDoc;
+
+	if (xmlDoc.LoadFile(file))
+	{
+		rglDebugger::log(xmlDoc.ErrorName(), rglDebugger::ERROR);
+		return false;
+	}
+
+	XMLElement* pRoot = xmlDoc.RootElement();
+
+	if (pRoot->Value() != stateID)
+	{
+		rglDebugger::log("State ID mismatch: \"" + string(pRoot->Value()) + "\" != \"" + stateID + "\".", rglDebugger::ERROR);
+		return false;
+	}
+
+	for (XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+	{
+		if (e->Value() == string("Textures"))
+			parseTextures(e, textureIDs);
+		else if (e->Value() == string("Objects"))
+			parseObjects(e, objects);
+		else
+			rglDebugger::log("Unknown element: \"" + string(e->Value()) + "\".", rglDebugger::WARNING);
+	}
+
+	return true;
+}
+
 // rglObjectParams
 
-rglObjectParams::rglObjectParams(int x, int y, int width, int height, string textureID)
-	: m_x(x), m_y(y), m_width(width), m_height(height), m_textureID(textureID)
+rglObjectParams::rglObjectParams(int x, int y, int width, int height, int numFrames, string textureID,
+								 int callbackID, int animSpeed)
+	: m_x(x), m_y(y), m_width(width), m_height(height), m_numFrames(numFrames), m_textureID(textureID),
+	m_callbackID(callbackID), m_animSpeed(animSpeed)
 {
 }
 
@@ -487,18 +573,78 @@ int rglObjectParams::getHeight() const
 	return m_height;
 }
 
+int rglObjectParams::getNumFrames() const
+{
+	return m_numFrames;
+}
+
+int rglObjectParams::getAnimSpeed() const
+{
+	return m_animSpeed;
+}
+
+int rglObjectParams::getCallbackID() const
+{
+	return m_callbackID;
+}
+
 string rglObjectParams::getTextureID() const
 {
 	return m_textureID;
 }
 
+// rglObjectFactory
+
+rglObjectFactory* rglObjectFactory::m_pInstance = 0;
+
+rglObjectFactory* rglObjectFactory::getInstance()
+{
+	if (m_pInstance == 0)
+		m_pInstance = new rglObjectFactory();
+
+	return m_pInstance;
+}
+
+bool rglObjectFactory::registerType(string typeID, shared_ptr<rglObjectCreator> pCreator)
+{
+	map<string, shared_ptr<rglObjectCreator>>::iterator it = m_creators.find(typeID);
+
+	if (it != m_creators.end())
+		return false;
+
+	m_creators[typeID] = pCreator;
+
+	return true;
+}
+
+shared_ptr<rglGameObject> rglObjectFactory::create(string typeID)
+{
+	map<string, shared_ptr<rglObjectCreator>>::iterator it = m_creators.find(typeID);
+
+	if (it == m_creators.end())
+	{
+		rglDebugger::log("Type \"" + typeID + "\" has not been registered.", rglDebugger::ERROR);
+		return 0;
+	}
+
+	shared_ptr<rglObjectCreator> pCreator = it->second;
+	return pCreator->createObject();
+}
 
 // rglGameActor
 
-rglGameActor::rglGameActor(const shared_ptr<rglObjectParams> pObjectParams)
-	: rglGameObject(pObjectParams), m_position(pObjectParams->getX(), pObjectParams->getY()),
-	m_velocity(0, 0), m_acceleration(0, 0)
+rglGameActor::rglGameActor()
+	: rglGameObject()
 {
+}
+
+void rglGameActor::load(const shared_ptr<rglObjectParams> pObjectParams)
+{
+	m_position = rglVector2(pObjectParams->getX(), pObjectParams->getY());
+
+	m_velocity = rglVector2(0, 0);
+	m_acceleration = rglVector2(0, 0);
+
 	m_width = pObjectParams->getWidth();
 	m_height = pObjectParams->getHeight();
 
@@ -506,6 +652,8 @@ rglGameActor::rglGameActor(const shared_ptr<rglObjectParams> pObjectParams)
 
 	m_currentRow = 0;
 	m_currentFrame = 0;
+
+	m_numFrames = pObjectParams->getNumFrames();
 }
 
 void rglGameActor::update()
@@ -537,9 +685,15 @@ int rglGameActor::getHeight()
 
 // rglButton
 
-rglButton::rglButton(const shared_ptr<rglObjectParams> pObjectParams, void (*onClick)())
-	: rglGameActor(pObjectParams), m_onClick(onClick)
+rglButton::rglButton()
+	: rglGameActor()
 {
+}
+
+void rglButton::load(const shared_ptr<rglObjectParams> pObjectParams)
+{
+	rglGameActor::load(pObjectParams);
+	m_callbackID = pObjectParams->getCallbackID();
 	m_currentFrame = MOUSE_AWAY;
 }
 
@@ -558,7 +712,7 @@ void rglButton::update()
 			{
 				m_currentFrame = MOUSE_PRESSED;
 
-				m_onClick();
+				m_callback();
 				
 				m_pressed = true;
 			}
@@ -583,4 +737,14 @@ void rglButton::draw()
 void rglButton::clean()
 {
 	rglGameActor::clean();
+}
+
+void rglButton::setCallback(void (*callback)())
+{
+	m_callback = callback;
+}
+
+int rglButton::getCallbackID()
+{
+	return m_callbackID;
 }

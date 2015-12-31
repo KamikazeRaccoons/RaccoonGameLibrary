@@ -1,5 +1,6 @@
 #include "OtherState.h"
 #include <rglGame.h>
+#include <rglStateParser.h>
 #include <rglInputHandler.h>
 #include <rglTextureManager.h>
 #include <rglButton.h>
@@ -29,17 +30,12 @@ void OtherState::onEnter()
 
 	SDL_SetWindowTitle(rglGame::getInstance()->getWindow(), "OtherState");
 
-	if (!rglTextureManager::getInstance()->load("assets/textures/InitState.png", "InitStateButton"))
-	{
-		rglDebugger::log("Could not load \"InitState.png\"", rglDebugger::ERROR);
-		rglGame::getInstance()->getGameStateMachine()->popState();
-		return;
-	}
+	rglStateParser stateParser;
+	stateParser.parseState("assets/states/OtherState.state", m_stateID, m_gameObjects, m_textureIDs);
 
-	int w, h;
-	SDL_GetWindowSize(rglGame::getInstance()->getWindow(), &w, &h);
+	m_callbacks.push_back(onInitStateClick);
 
-	m_gameObjects.push_back(make_shared<rglButton>(make_shared<rglObjectParams>(w / 2 - 32, h / 2 - 16, 64, 32, "InitStateButton"), &onInitStateClick));
+	setCallbacks(m_callbacks);
 }
 
 void OtherState::onExit()
@@ -51,7 +47,19 @@ void OtherState::onExit()
 
 	m_gameObjects.clear();
 
-	rglTextureManager::getInstance()->unload("InitStateButton");
+	for (unsigned int i = 0; i < m_textureIDs.size(); i++)
+		rglTextureManager::getInstance()->unload(m_textureIDs[i]);
+}
+
+void OtherState::setCallbacks(const vector<Callback>& callbacks)
+{
+	for (unsigned int i = 0; i < m_gameObjects.size(); i++)
+	{
+		shared_ptr<rglButton> pButton = dynamic_pointer_cast<rglButton>(m_gameObjects[i]);
+
+		if (pButton)
+			pButton->setCallback(m_callbacks[pButton->getCallbackID()]);
+	}
 }
 
 std::string OtherState::getStateID() const
