@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -20,13 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -42,13 +42,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -62,7 +62,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;zdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,13 +80,14 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;zdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base64.h" />
     <ClInclude Include="rglButton.h" />
     <ClInclude Include="rglDebugger.h" />
     <ClInclude Include="rglGame.h" />
@@ -96,16 +97,24 @@
     <ClInclude Include="rglGameStateMachine.h" />
     <ClInclude Include="rglGUIState.h" />
     <ClInclude Include="rglInputHandler.h" />
+    <ClInclude Include="rglLayer.h" />
+    <ClInclude Include="rglLevel.h" />
+    <ClInclude Include="rglLevelParser.h" />
     <ClInclude Include="rglObjectFactory.h" />
     <ClInclude Include="rglObjectParams.h" />
     <ClInclude Include="rglStateParser.h" />
     <ClInclude Include="rglTextureManager.h" />
+    <ClInclude Include="rglTileLayer.h" />
     <ClInclude Include="rglVector2.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base64.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

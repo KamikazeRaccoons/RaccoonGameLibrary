@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\t_buckm\Documents\Visual Studio 2012\Projects\RaccoonGameLibrary\RGL;C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\t_buckm\Documents\Visual Studio 2012\Projects\RaccoonGameLibrary\Release;C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\RGL;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\t_buckm\Documents\Visual Studio 2012\Projects\RaccoonGameLibrary\RGL;C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\include;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\t_buckm\Documents\Visual Studio 2012\Projects\RaccoonGameLibrary\Release;C:\Users\t_buckm\Documents\SDL\SDL2-2.0.3\lib\x86;C:\Users\t_buckm\Documents\SDL\SDL2_image-2.0.0\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\RGL;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\Release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -62,7 +62,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;RGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;zdll.lib;RGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,13 +81,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;RGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;zdll.lib;RGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="InitState.cpp" />
+    <ClCompile Include="ExampleState.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OtherState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RGL\RGL.vcxproj">
@@ -95,8 +94,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InitState.h" />
-    <ClInclude Include="OtherState.h" />
+    <ClInclude Include="ExampleState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

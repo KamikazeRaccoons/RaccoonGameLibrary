@@ -3,21 +3,20 @@
 #include <rglGUIState.h>
 #include <rglGameObject.h>
 #include <rglDebugger.h>
+#include <rglLevel.h>
 
-class InitState : public rglGUIState
+class ExampleState : public rglGUIState
 {
 private:
 
 	static string m_stateID;
 
-	virtual void setCallbacks(const vector<Callback>& callbacks);
-
-	static void onOtherStateClick();
+	shared_ptr<rglLevel> m_pLevel;
 
 public:
 
-	InitState() { }
-	~InitState() { }
+	ExampleState() { }
+	~ExampleState() { }
 
 	virtual void update();
 	virtual void render();

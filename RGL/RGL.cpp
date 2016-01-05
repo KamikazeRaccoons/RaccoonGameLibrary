@@ -8,8 +8,12 @@
 #include "rglDebugger.h"
 #include "rglVector2.h"
 #include "rglGameState.h"
+#include "rglGUIState.h"
 #include "rglGameStateMachine.h"
 #include "rglStateParser.h"
+#include "rglLevel.h"
+#include "rglTileLayer.h"
+#include "rglLevelParser.h"
 #include "rglObjectParams.h"
 #include "rglObjectFactory.h"
 #include "rglGameObject.h"
@@ -45,12 +49,22 @@ shared_ptr<rglGameStateMachine> rglGame::getGameStateMachine()
 
 void rglGame::setFrameRate(double frameRate)
 {
-	m_frameRate = frameRate;
+	m_deltaTime = 1.0 / frameRate;
 }
 
-double rglGame::getFrameRate()
+double rglGame::getDeltaTime() const
 {
-	return m_frameRate;
+	return m_deltaTime;
+}
+
+int rglGame::getWidth() const
+{
+	return m_width;
+}
+
+int rglGame::getHeight() const
+{
+	return m_height;
 }
 
 bool rglGame::run(string title, int width, int height, shared_ptr<rglGameState> pInitState, bool fullscreen, double frameRate)
@@ -62,8 +76,9 @@ bool rglGame::run(string title, int width, int height, shared_ptr<rglGameState> 
 		(m_pRenderer = (SDL_CreateRenderer(m_pWindow, -1, 0))) == 0)
 		return false;
 
-	m_frameRate = 1.0 / frameRate;
-
+	m_width = width;
+	m_height = height;
+	m_deltaTime = 1.0 / frameRate;
 	m_running = true;
 
 	rglObjectFactory::getInstance()->registerType("rglButton", make_shared<rglButtonCreator>());
@@ -81,11 +96,11 @@ bool rglGame::run(string title, int width, int height, shared_ptr<rglGameState> 
 		updateTime = currentTime;
 		accumulatedTime += frameTime;
 
-		while (accumulatedTime > m_frameRate)
+		while (accumulatedTime > m_deltaTime)
 		{
 			pollEvents();
 			update();
-			accumulatedTime -= m_frameRate;
+			accumulatedTime -= m_deltaTime;
 		}
 		
 		render();
@@ -289,6 +304,21 @@ void rglTextureManager::drawFrame(string id, int x, int y, int width, int height
 	SDL_RenderCopyEx(rglGame::getInstance()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, renderFlip);
 }
 
+void rglTextureManager::drawTile(string id, int margin, int spacing, int x, int y, int width, int height,
+	int currentRow, int currentFrame)
+{
+	SDL_Rect srcRect;
+	SDL_Rect destRect;
+	srcRect.x = margin + (spacing + width) * currentFrame;
+	srcRect.y = margin + (spacing + height) * currentRow;
+	srcRect.w = destRect.w = width;
+	srcRect.h = destRect.h = height;
+	destRect.x = x;
+	destRect.y = y;
+
+	SDL_RenderCopyEx(rglGame::getInstance()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, SDL_FLIP_NONE);
+}
+
 // rglDebugger
 
 void rglDebugger::log(string message, rglDebugger::LogType logType)
@@ -467,6 +497,19 @@ void rglGameStateMachine::render()
 		m_gameStates.back()->render();
 }
 
+// rglGUIState
+
+void rglGUIState::updateCallbacks()
+{
+	for (unsigned int i = 0; i < m_gameObjects.size(); i++)
+	{
+		shared_ptr<rglButton> pButton = dynamic_pointer_cast<rglButton>(m_gameObjects[i]);
+
+		if (pButton)
+			pButton->setCallback(m_callbacks[pButton->getCallbackID()]);
+	}
+}
+
 // rglStateParser
 
 void rglStateParser::parseTextures(XMLElement* pTextureRoot, vector<string>& textureIDs)
@@ -542,6 +585,196 @@ bool rglStateParser::parseState(const char* file, string stateID, vector<shared_
 	}
 
 	return true;
+}
+
+// rglLevel
+
+void rglLevel::update()
+{
+	for (unsigned int i = 0; i < m_layers.size(); i++)
+		m_layers[i]->update();
+}
+
+void rglLevel::render()
+{
+	for (unsigned int i = 0; i < m_layers.size(); i++)
+		m_layers[i]->render();
+}
+
+vector<rglTileset>& rglLevel::getTilesets()
+{
+	return m_tilesets;
+}
+
+vector<shared_ptr<rglLayer>>& rglLevel::getLayers()
+{
+	return m_layers;
+}
+
+// rglTileLayer
+
+rglTileLayer::rglTileLayer(int tileSize, const vector<rglTileset>& tilesets)
+	: m_tileSize(tileSize), m_tilesets(tilesets), m_position(0, 0), m_velocity(0, 0)
+{
+	m_numColumns = rglGame::getInstance()->getWidth() / m_tileSize;
+	m_numRows = rglGame::getInstance()->getHeight() / m_tileSize;
+}
+
+void rglTileLayer::update()
+{
+	m_position += m_velocity;
+}
+
+void rglTileLayer::render()
+{
+	int x, y, x2, y2;
+
+	x = (int)(m_position.getX() / m_tileSize);
+	y = (int)(m_position.getY() / m_tileSize);
+
+	x2 = (int)m_position.getX() % m_tileSize;
+	y2 = (int)m_position.getY() % m_tileSize;
+
+	for (int i = 0; i < m_numRows; i++)
+	{
+		for (int j = 0; j < m_numColumns; j++)
+		{
+			int id = m_tileIDs[i][j + x];
+
+			if (id == 0)
+				continue;
+
+			rglTileset tileset = getTilesetByID(id);
+
+			id--;
+
+			rglTextureManager::getInstance()->drawTile(tileset.name, tileset.margin, tileset.spacing,
+				(j * m_tileSize) - x2, (i * m_tileSize) - y2, m_tileSize, m_tileSize,
+				(id - (tileset.firstGridID - 1)) / tileset.numColumns, (id - (tileset.firstGridID - 1)) % tileset.numColumns);
+		}
+	}
+}
+
+void rglTileLayer::setTileIDs(const vector<vector<int>>& data)
+{
+	m_tileIDs = data;
+}
+
+void rglTileLayer::setTileSize(int tileSize)
+{
+	m_tileSize = tileSize;
+}
+
+rglTileset rglTileLayer::getTilesetByID(int tileID)
+{
+	for (unsigned int i = 0; i < m_tilesets.size(); i++)
+	{
+		if (i + 1 <= m_tilesets.size() - 1)
+		{
+			if (tileID >= m_tilesets[i].firstGridID && tileID < m_tilesets[i + 1].firstGridID)
+				return m_tilesets[i];
+		}
+		else
+		{
+			return m_tilesets[i];
+		}
+	}
+
+	rglDebugger::log("Could not find tileset with ID " + to_string(tileID) + ". Returning empty tileset.");
+	return rglTileset();
+}
+
+// rglLevelParser
+
+void rglLevelParser::parseTilesets(XMLElement* pTilesetRoot, vector<rglTileset>& tilesets, string texturePath)
+{
+	if (!rglTextureManager::getInstance()->load(texturePath + pTilesetRoot->FirstChildElement()->Attribute("source"),
+		pTilesetRoot->Attribute("name")))
+	{
+		rglDebugger::log("Could not load texture \"" + string(pTilesetRoot->FirstChildElement()->Attribute("source")) + "\".", rglDebugger::ERROR);
+		return;
+	}
+
+	rglTileset tileset;
+	tileset.width = pTilesetRoot->FirstChildElement()->IntAttribute("width");
+	tileset.height = pTilesetRoot->FirstChildElement()->IntAttribute("height");
+	tileset.firstGridID = pTilesetRoot->IntAttribute("firstgid");
+	tileset.tileWidth = pTilesetRoot->IntAttribute("tilewidth");
+	tileset.tileHeight = pTilesetRoot->IntAttribute("tileheight");
+	tileset.spacing = pTilesetRoot->IntAttribute("spacing");
+	tileset.margin = pTilesetRoot->IntAttribute("margin");
+	tileset.name = pTilesetRoot->Attribute("name");
+	tileset.numColumns = tileset.width / (tileset.tileWidth + tileset.spacing);
+
+	tilesets.push_back(tileset);
+}
+
+void rglLevelParser::parseTileLayer(XMLElement* pTileElement, vector<shared_ptr<rglLayer>>& layers,
+	const vector<rglTileset>& tilesets)
+{
+	shared_ptr<rglTileLayer> pTileLayer = make_shared<rglTileLayer>(m_tileSize, tilesets);
+
+	vector<vector<int>> data;
+
+	string decodedIDs;
+	XMLElement* pDataElement = 0;
+
+	for (XMLElement* e = pTileElement->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+	{
+		if (e->Value() == string("data"))
+			pDataElement = e;
+	}
+
+	if (!pDataElement)
+	{
+		rglDebugger::log("Could not find \"data\" element.", rglDebugger::ERROR);
+		return;
+	}
+
+	string t = pDataElement->FirstChild()->ToText()->Value();
+	t.erase(remove_if(t.begin(), t.end(), isspace), t.end());
+	decodedIDs = base64_decode(t);
+
+	uLongf numGids = m_width * m_height * sizeof(int);
+	vector<unsigned int> gids(numGids);
+	uncompress((Bytef*)&gids[0], &numGids, (const Bytef*)decodedIDs.c_str(), decodedIDs.size());
+
+	vector<int> layerRow(m_width);
+
+	for (int i = 0; i < m_height; i++)
+		data.push_back(layerRow);
+
+	for (int rows = 0; rows < m_height; rows++)
+		for (int columns = 0; columns < m_width; columns++)
+			data[rows][columns] = gids[rows * m_width + columns];
+
+	pTileLayer->setTileIDs(data);
+
+	layers.push_back(pTileLayer);
+}
+
+shared_ptr<rglLevel> rglLevelParser::parseLevel(const char* file, string texturePath)
+{
+	XMLDocument xmlDoc;
+	xmlDoc.LoadFile(file);
+
+	shared_ptr<rglLevel> pLevel = make_shared<rglLevel>(rglLevel());
+
+	XMLElement* pRoot = xmlDoc.RootElement();
+
+	m_tileSize = pRoot->IntAttribute("tilewidth");
+	m_width = pRoot->IntAttribute("width");
+	m_height = pRoot->IntAttribute("height");
+
+	for (XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+	{
+		if (e->Value() == string("tileset"))
+			parseTilesets(e, pLevel->getTilesets(), texturePath);
+		else if (e->Value() == string("layer"))
+			parseTileLayer(e, pLevel->getLayers(), pLevel->getTilesets());
+	}
+
+	return pLevel;
 }
 
 // rglObjectParams

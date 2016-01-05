@@ -17,6 +17,5 @@ protected:
 
 	vector<Callback> m_callbacks; 
 
-	virtual void setCallbacks(const vector<Callback>& callbacks) = 0;
-
+	RGL_GUISTATE_API void updateCallbacks();
 };

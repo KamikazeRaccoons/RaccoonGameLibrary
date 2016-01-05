@@ -15,13 +15,16 @@ class rglGame
 private:
 
 	static rglGame* m_pInstance;
-
-	bool m_running;
-
-	double m_frameRate;
 	
 	SDL_Window* m_pWindow;
 	SDL_Renderer* m_pRenderer;
+
+	bool m_running;
+
+	double m_deltaTime;
+
+	int m_width;
+	int m_height;
 
 	shared_ptr<rglGameStateMachine> m_pGameStateMachine;
 
@@ -38,10 +41,13 @@ public:
 	static RGL_GAME_API rglGame* getInstance();
 
 	RGL_GAME_API void setFrameRate(double frameRate);
-	RGL_GAME_API double getFrameRate();
+	RGL_GAME_API double getDeltaTime() const;
 
 	RGL_GAME_API SDL_Window* getWindow();
 	RGL_GAME_API SDL_Renderer* getRenderer();
+
+	RGL_GAME_API int getWidth() const;
+	RGL_GAME_API int getHeight() const;
 
 	RGL_GAME_API shared_ptr<rglGameStateMachine> getGameStateMachine();
 

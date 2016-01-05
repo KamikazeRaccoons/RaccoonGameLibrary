@@ -14,6 +14,7 @@
 
 // Standard Library Items:
 #include <memory>
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <map>
@@ -25,6 +26,12 @@
 
 // TinyXML2 Header Files:
 #include "tinyxml2.h"
+
+// Base64 Header Files:
+#include "base64.h"
+
+// zlib Header Files:
+#include <zlib.h>
 
 // Using statements:
 using namespace std;
