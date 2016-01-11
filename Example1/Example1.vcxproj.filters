@@ -21,9 +21,15 @@
     <ClCompile Include="ExampleState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helicopter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExampleState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helicopter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

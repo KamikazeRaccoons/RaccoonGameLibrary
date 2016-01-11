@@ -1,17 +1,14 @@
 #pragma once
 
-#include <rglGUIState.h>
-#include <rglGameObject.h>
-#include <rglDebugger.h>
-#include <rglLevel.h>
+#include <RGL.h>
 
-class ExampleState : public rglGUIState
+class ExampleState : public rgl::GUIState
 {
 private:
 
-	static string m_stateID;
+	static std::string m_stateID;
 
-	shared_ptr<rglLevel> m_pLevel;
+	std::shared_ptr<rgl::Level> m_pLevel;
 
 public:
 
@@ -24,7 +21,7 @@ public:
 	virtual void onEnter();
 	virtual void onExit();
 
-	virtual string getStateID() const;
+	virtual std::string getStateID() const;
 
 };
 

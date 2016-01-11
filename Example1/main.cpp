@@ -1,13 +1,16 @@
 #include <iostream>
-#include <rglGame.h>
-#include <rglDebugger.h>
+
+#include <RGL.h>
 #include "ExampleState.h"
+#include "Helicopter.h"
 
 int main(int argc, char** argv)
 {
-	if (!rglGame::getInstance()->run("Example1", 640, 480, make_shared<ExampleState>()))
+	rgl::ObjectFactory::getInstance()->registerType("Helicopter", std::make_shared<HelicopterCreator>());
+
+	if (!rgl::Game::getInstance()->run("Example1", 640, 480, std::make_shared<ExampleState>()))
 	{
-		rglDebugger::log("Could not initialize game.\n", rglDebugger::ERROR);
+		rgl::Debugger::log("Could not initialize game.\n", rgl::Debugger::ERROR);
 		system("PAUSE");
 	}
 
