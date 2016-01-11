@@ -32,7 +32,3 @@
 
 // zlib Header Files:
 #include <zlib.h>
-
-// Using statements:
-using namespace std;
-using namespace tinyxml2;

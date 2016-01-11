@@ -8,15 +8,18 @@
 #define RGL_LAYER_API __declspec(dllimport)
 #endif
 
-class rglLayer
+namespace rgl
 {
-protected:
+	class Layer
+	{
+	protected:
 
-	virtual ~rglLayer() { }
+		virtual ~Layer() { }
 
-public:
+	public:
 
-	virtual void update() = 0;
-	virtual void render() = 0;
+		virtual void update() = 0;
+		virtual void render() = 0;
 
-};
+	};
+}
