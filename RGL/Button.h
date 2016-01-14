@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameActor.h"
+#include "GameObject.h"
 #include "ObjectFactory.h"
 
 #ifdef RGL_EXPORTS
@@ -11,7 +11,7 @@
 
 namespace rgl
 {
-	class Button : public GameActor
+	class Button : public GameObject
 	{
 	private:
 
@@ -24,12 +24,12 @@ namespace rgl
 
 		bool m_pressed;
 
-		void(*m_callback)();
+		std::function<void()> m_callback;
 		int m_callbackID;
 
 	public:
 
-		Button() : GameActor() { }
+		Button() : GameObject() { }
 
 		virtual RGL_BUTTON_API void load(const std::shared_ptr<ObjectParams> pObjectParams);
 
@@ -37,7 +37,7 @@ namespace rgl
 		virtual RGL_BUTTON_API void draw();
 		virtual RGL_BUTTON_API void clean();
 
-		RGL_BUTTON_API void setCallback(void(*callback)());
+		RGL_BUTTON_API void setCallback(std::function<void()> callback);
 		RGL_BUTTON_API int getCallbackID();
 	};
 

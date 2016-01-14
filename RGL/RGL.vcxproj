@@ -91,11 +91,9 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GameStateMachine.h" />
-    <ClInclude Include="GUIState.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="Level.h" />
@@ -104,7 +102,6 @@
     <ClInclude Include="ObjectLayer.h" />
     <ClInclude Include="ObjectParams.h" />
     <ClInclude Include="RGL.h" />
-    <ClInclude Include="StateParser.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="TileLayer.h" />
     <ClInclude Include="Vector2.h" />

@@ -15,6 +15,7 @@
 // Standard Library Items:
 #include <memory>
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <map>

@@ -30,6 +30,8 @@ namespace rgl
 
 		std::vector<Tileset> m_tilesets;
 		std::vector<std::shared_ptr<Layer>> m_layers;
+		std::vector<std::string> m_textureIDs;
+		std::vector<std::function<void()>> m_callbacks;
 
 	public:
 
@@ -38,9 +40,14 @@ namespace rgl
 
 		RGL_LEVEL_API void update();
 		RGL_LEVEL_API void render();
+		RGL_LEVEL_API void clean();
+
+		RGL_LEVEL_API void addCallback(std::function<void()> callback);
+		RGL_LEVEL_API void assignCallbacks();
 
 		RGL_LEVEL_API std::vector<Tileset>& getTilesets();
 		RGL_LEVEL_API std::vector<std::shared_ptr<Layer>>& getLayers();
+		RGL_LEVEL_API std::vector<std::string>& getTextureIDs();
 
 	};
 }

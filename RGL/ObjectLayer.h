@@ -22,6 +22,7 @@ namespace rgl
 
 		virtual RGL_OBJECTLAYER_API void update();
 		virtual RGL_OBJECTLAYER_API void render();
+		virtual RGL_OBJECTLAYER_API void clean();
 
 		RGL_OBJECTLAYER_API std::vector<std::shared_ptr<GameObject>>& getGameObjects();
 

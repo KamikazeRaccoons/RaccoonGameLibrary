@@ -7,11 +7,6 @@ namespace rgl
 {
 	class GameState
 	{
-	protected:
-
-		std::vector<std::shared_ptr<GameObject>> m_gameObjects;
-		std::vector<std::string> m_textureIDs;
-
 	public:
 
 		virtual void update() = 0;

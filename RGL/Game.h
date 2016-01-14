@@ -40,7 +40,7 @@ namespace rgl
 
 	public:
 
-		static RGL_GAME_API Game* getInstance();
+		static RGL_GAME_API Game* get();
 
 		RGL_GAME_API void setFrameRate(double frameRate);
 		RGL_GAME_API double getDeltaTime() const;

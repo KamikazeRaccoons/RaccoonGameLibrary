@@ -36,5 +36,6 @@ namespace rgl
 
 		RGL_GAMESTATEMACHINE_API void update();
 		RGL_GAMESTATEMACHINE_API void render();
+		RGL_GAMESTATEMACHINE_API void clean();
 	};
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="60" height="15" tilewidth="32" tileheight="32" nextobjectid="6">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="60" height="15" tilewidth="32" tileheight="32" nextobjectid="7">
  <properties>
-  <property name="helicopter" value="helicopter.png"/>
+  <property name="ExitButton" value="ExitButton.png"/>
  </properties>
  <tileset firstgid="1" name="blocks1" tilewidth="32" tileheight="32" spacing="2" margin="2" tilecount="198">
   <image source="blocks1.png" width="614" height="376"/>
@@ -12,12 +12,10 @@
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="1" name="Helicopter1" type="Helicopter" x="0" y="0" width="32" height="32">
+  <object id="6" name="ExitButton" type="Button" x="8" y="8" width="64" height="32">
    <properties>
-    <property name="numFrames" value="4"/>
-    <property name="textureHeight" value="277"/>
-    <property name="textureID" value="helicopter"/>
-    <property name="textureWidth" value="672"/>
+    <property name="callbackID" value="0"/>
+    <property name="textureID" value="ExitButton"/>
    </properties>
   </object>
  </objectgroup>

@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<OtherState>
-	<Textures>
-		<Texture filename="assets/textures/InitState.png" ID="InitStateButton"/>
-	</Textures>
-	<Objects>
-		<Object type="rglButton" x="288" y="224" width="64" height="32" textureID="InitStateButton" numFrames="0" callbackID="0"/>
-	</Objects>
-</OtherState>

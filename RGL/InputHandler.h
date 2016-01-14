@@ -39,7 +39,7 @@ namespace rgl
 			RIGHT = 2
 		};
 
-		static RGL_INPUTHANDLER_API InputHandler* getInstance();
+		static RGL_INPUTHANDLER_API InputHandler* get();
 
 		RGL_INPUTHANDLER_API bool getMouseButtonState(int buttonID);
 		RGL_INPUTHANDLER_API std::shared_ptr<Vector2> getMousePosition();

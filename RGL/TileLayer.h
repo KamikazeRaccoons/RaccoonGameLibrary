@@ -34,6 +34,7 @@ namespace rgl
 
 		virtual RGL_TILELAYER_API void update();
 		virtual RGL_TILELAYER_API void render();
+		virtual void clean() { }
 
 		RGL_TILELAYER_API void setTileIDs(const std::vector<std::vector<int>>& data);
 		RGL_TILELAYER_API void setTileSize(int tileSize);

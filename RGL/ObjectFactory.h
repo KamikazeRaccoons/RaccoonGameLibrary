@@ -33,7 +33,7 @@ namespace rgl
 
 	public:
 
-		static RGL_OBJECTFACTORY_API ObjectFactory* getInstance();
+		static RGL_OBJECTFACTORY_API ObjectFactory* get();
 
 		RGL_OBJECTFACTORY_API bool registerType(std::string typeID, std::shared_ptr<ObjectCreator> pCreator);
 		RGL_OBJECTFACTORY_API std::shared_ptr<GameObject> create(std::string typeID);

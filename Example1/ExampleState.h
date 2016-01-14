@@ -2,13 +2,15 @@
 
 #include <RGL.h>
 
-class ExampleState : public rgl::GUIState
+class ExampleState : public rgl::GameState
 {
 private:
 
 	static std::string m_stateID;
 
 	std::shared_ptr<rgl::Level> m_pLevel;
+
+	static void quitState();
 
 public:
 

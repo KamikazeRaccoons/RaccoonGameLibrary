@@ -23,7 +23,7 @@ namespace rgl
 
 	public:
 
-		static RGL_TEXTUREMANAGER_API TextureManager* getInstance();
+		static RGL_TEXTUREMANAGER_API TextureManager* get();
 
 		RGL_TEXTUREMANAGER_API bool load(std::string fileName, std::string id);
 		RGL_TEXTUREMANAGER_API void unload(std::string id);

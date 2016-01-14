@@ -20,10 +20,10 @@ namespace rgl
 		int m_width;
 		int m_height;
 
-		RGL_LEVELPARSER_API void parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::vector<Tileset>& tilesets, std::string path);
+		RGL_LEVELPARSER_API void parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::vector<Tileset>& tilesets, std::vector<std::string>& textureIDs, std::string path);
 		RGL_LEVELPARSER_API void parseTileLayer(tinyxml2::XMLElement* pTileElement, std::vector<std::shared_ptr<Layer>>& layers,
 			const std::vector<Tileset>& tilesets);
-		RGL_LEVELPARSER_API void parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::string path);
+		RGL_LEVELPARSER_API void parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::vector<std::string>& textureIDs, std::string path);
 		RGL_LEVELPARSER_API void parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::vector<std::shared_ptr<Layer>>& layers);
 
 	public:

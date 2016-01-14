@@ -8,9 +8,7 @@
 #include "Debugger.h"
 #include "Vector2.h"
 #include "GameState.h"
-#include "GUIState.h"
 #include "GameStateMachine.h"
-#include "StateParser.h"
 #include "Level.h"
 #include "TileLayer.h"
 #include "ObjectLayer.h"
@@ -18,7 +16,6 @@
 #include "ObjectParams.h"
 #include "ObjectFactory.h"
 #include "GameObject.h"
-#include "GameActor.h"
 #include "Button.h"
 
 namespace rgl
@@ -27,7 +24,7 @@ namespace rgl
 
 	Game* Game::m_pInstance = 0;
 
-	Game* Game::getInstance()
+	Game* Game::get()
 	{
 		if (m_pInstance == 0)
 			m_pInstance = new Game();
@@ -84,7 +81,7 @@ namespace rgl
 		m_deltaTime = 1.0 / frameRate;
 		m_running = true;
 
-		ObjectFactory::getInstance()->registerType("Button", std::make_shared<ButtonCreator>());
+		ObjectFactory::get()->registerType("Button", std::make_shared<ButtonCreator>());
 
 		m_pGameStateMachine = std::make_shared<GameStateMachine>();
 		m_pGameStateMachine->changeState(pInitState);
@@ -121,7 +118,7 @@ namespace rgl
 
 	void Game::pollEvents()
 	{
-		InputHandler::getInstance()->update();
+		InputHandler::get()->update();
 	}
 
 	void Game::update()
@@ -141,6 +138,7 @@ namespace rgl
 
 	void Game::clean()
 	{
+		m_pGameStateMachine->clean();
 		SDL_DestroyRenderer(m_pRenderer);
 		SDL_DestroyWindow(m_pWindow);
 		SDL_Quit();
@@ -158,7 +156,7 @@ namespace rgl
 		m_pMousePosition = std::make_shared<Vector2>();
 	}
 
-	InputHandler* InputHandler::getInstance()
+	InputHandler* InputHandler::get()
 	{
 		if (m_pInstance == 0)
 			m_pInstance = new InputHandler();
@@ -233,7 +231,7 @@ namespace rgl
 			switch (event.type)
 			{
 			case SDL_QUIT:
-				Game::getInstance()->quit();
+				Game::get()->quit();
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				onMouseButtonDown(event);
@@ -252,7 +250,7 @@ namespace rgl
 
 	TextureManager* TextureManager::m_pInstance = 0;
 
-	TextureManager* TextureManager::getInstance()
+	TextureManager* TextureManager::get()
 	{
 		if (m_pInstance == 0)
 			m_pInstance = new TextureManager();
@@ -267,7 +265,7 @@ namespace rgl
 		if (pTempSurface == 0)
 			return false;
 
-		SDL_Texture* pTexture = SDL_CreateTextureFromSurface(Game::getInstance()->getRenderer(), pTempSurface);
+		SDL_Texture* pTexture = SDL_CreateTextureFromSurface(Game::get()->getRenderer(), pTempSurface);
 
 		SDL_FreeSurface(pTempSurface);
 
@@ -304,7 +302,7 @@ namespace rgl
 		destRect.x = x;
 		destRect.y = y;
 
-		SDL_RenderCopyEx(Game::getInstance()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, renderFlip);
+		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, renderFlip);
 	}
 
 	void TextureManager::drawTile(std::string id, int margin, int spacing, int x, int y, int width, int height,
@@ -319,7 +317,7 @@ namespace rgl
 		destRect.x = x;
 		destRect.y = y;
 
-		SDL_RenderCopyEx(Game::getInstance()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, SDL_FLIP_NONE);
+		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, SDL_FLIP_NONE);
 	}
 
 	// Debugger
@@ -500,94 +498,13 @@ namespace rgl
 			m_gameStates.back()->render();
 	}
 
-	// GUIState
-
-	void GUIState::updateCallbacks()
+	void GameStateMachine::clean()
 	{
-		for (unsigned int i = 0; i < m_gameObjects.size(); i++)
+		while (!m_gameStates.empty())
 		{
-			std::shared_ptr<Button> pButton = std::dynamic_pointer_cast<Button>(m_gameObjects[i]);
-
-			if (pButton)
-				pButton->setCallback(m_callbacks[pButton->getCallbackID()]);
+			popState();
+			update();
 		}
-	}
-
-	// StateParser
-
-	void StateParser::parseTextures(tinyxml2::XMLElement* pTextureRoot, std::vector<std::string>& textureIDs)
-	{
-		for (tinyxml2::XMLElement* e = pTextureRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
-		{
-			if (e->Value() != std::string("Texture"))
-			{
-				Debugger::log("Unknown element: \"" + std::string(e->Value()) + "\".", Debugger::WARNING);
-				continue;
-			}
-
-			std::string filename = e->Attribute("filename");
-			std::string id = e->Attribute("ID");
-			textureIDs.push_back(id);
-
-			TextureManager::getInstance()->load(filename, id);
-		}
-	}
-
-	void StateParser::parseObjects(tinyxml2::XMLElement* pStateRoot, std::vector<std::shared_ptr<GameObject>>& objects)
-	{
-		for (tinyxml2::XMLElement* e = pStateRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
-		{
-			if (e->Value() != std::string("Object"))
-			{
-				Debugger::log("Unknown element: \"" + std::string(e->Value()) + "\".", Debugger::WARNING);
-				continue;
-			}
-
-			int x = e->IntAttribute("x");
-			int y = e->IntAttribute("y");
-			int width = e->IntAttribute("width");
-			int height = e->IntAttribute("height");
-			int numFrames = e->IntAttribute("numFrames");
-			int callbackID = e->IntAttribute("callbackID");
-			int animSpeed = e->IntAttribute("animSpeed");
-			std::string textureID = e->Attribute("textureID");
-
-			std::shared_ptr<GameObject> pGameObject = ObjectFactory::getInstance()->create(e->Attribute("type"));
-			pGameObject->load(std::make_shared<ObjectParams>(x, y, width, height, numFrames, textureID, callbackID, animSpeed));
-			objects.push_back(pGameObject);
-		}
-	}
-
-	bool StateParser::parseState(const char* file, std::string stateID, std::vector<std::shared_ptr<GameObject>>& objects,
-		std::vector<std::string>& textureIDs)
-	{
-		tinyxml2::XMLDocument xmlDoc;
-
-		if (xmlDoc.LoadFile(file))
-		{
-			Debugger::log(xmlDoc.ErrorName(), Debugger::ERROR);
-			return false;
-		}
-
-		tinyxml2::XMLElement* pRoot = xmlDoc.RootElement();
-
-		if (pRoot->Value() != stateID)
-		{
-			Debugger::log("State ID mismatch: \"" + std::string(pRoot->Value()) + "\" != \"" + stateID + "\".", Debugger::ERROR);
-			return false;
-		}
-
-		for (tinyxml2::XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
-		{
-			if (e->Value() == std::string("Textures"))
-				parseTextures(e, textureIDs);
-			else if (e->Value() == std::string("Objects"))
-				parseObjects(e, objects);
-			else
-				Debugger::log("Unknown element: \"" + std::string(e->Value()) + "\".", Debugger::WARNING);
-		}
-
-		return true;
 	}
 
 	// Level
@@ -604,8 +521,42 @@ namespace rgl
 			m_layers[i]->render();
 	}
 
+	void Level::clean()
+	{
+		for (unsigned int i = 0; i < m_layers.size(); i++)
+			m_layers[i]->clean();
+
+		for (unsigned int i = 0; i < m_textureIDs.size(); i++)
+			rgl::TextureManager::get()->unload(m_textureIDs[i]);
+	}
+
+	void Level::addCallback(std::function<void()> callback)
+	{
+		m_callbacks.push_back(callback);
+	}
+
+	void Level::assignCallbacks()
+	{
+		for (unsigned int i = 0; i < m_layers.size(); i++)
+		{
+			std::shared_ptr<ObjectLayer> pObjectLayer = std::dynamic_pointer_cast<ObjectLayer>(m_layers[i]);
+
+			if (!pObjectLayer)
+				continue;
+
+			for (unsigned int j = 0; j < pObjectLayer->getGameObjects().size(); j++)
+			{
+				std::shared_ptr<Button> pButton = std::dynamic_pointer_cast<Button>(pObjectLayer->getGameObjects()[j]);
+
+				if (pButton && pButton->getCallbackID() < (int)m_callbacks.size())
+					pButton->setCallback(m_callbacks[pButton->getCallbackID()]);
+			}
+		}
+	}
+
 	std::vector<Tileset>& Level::getTilesets()
 	{
+		
 		return m_tilesets;
 	}
 
@@ -614,18 +565,23 @@ namespace rgl
 		return m_layers;
 	}
 
+	std::vector<std::string>& Level::getTextureIDs()
+	{
+		return m_textureIDs;
+	}
+
 	// TileLayer
 
 	TileLayer::TileLayer(int tileSize, const std::vector<Tileset>& tilesets)
 		: m_tileSize(tileSize), m_tilesets(tilesets), m_position(0, 0), m_velocity(0, 0)
 	{
-		m_numColumns = Game::getInstance()->getWidth() / m_tileSize;
-		m_numRows = Game::getInstance()->getHeight() / m_tileSize;
+		m_numColumns = Game::get()->getWidth() / m_tileSize;
+		m_numRows = Game::get()->getHeight() / m_tileSize;
 	}
 
 	void TileLayer::update()
 	{
-		m_position += m_velocity;
+		m_velocity.setX(1);
 	}
 
 	void TileLayer::render()
@@ -656,7 +612,7 @@ namespace rgl
 
 				id--;
 
-				TextureManager::getInstance()->drawTile(tileset.name, tileset.margin, tileset.spacing,
+				TextureManager::get()->drawTile(tileset.name, tileset.margin, tileset.spacing,
 					(j * m_tileSize) - x2, (i * m_tileSize) - y2, m_tileSize, m_tileSize,
 					(id - (tileset.firstGridID - 1)) / max(tileset.numColumns, 1), (id - (tileset.firstGridID - 1)) % max(tileset.numColumns, 1));
 			}
@@ -712,14 +668,28 @@ namespace rgl
 			m_gameObjects[i]->draw();
 	}
 
+	void ObjectLayer::clean()
+	{
+		for (unsigned int i = 0; i < m_gameObjects.size(); i++)
+			m_gameObjects[i]->clean();
+
+		m_gameObjects.clear();
+	}
+
 	// LevelParser
 
-	void LevelParser::parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::vector<Tileset>& tilesets, std::string path)
+	void LevelParser::parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::vector<Tileset>& tilesets, std::vector<std::string>& textureIDs, std::string path)
 	{
-		if (!TextureManager::getInstance()->load(path + pTilesetRoot->FirstChildElement()->Attribute("source"),
-			pTilesetRoot->Attribute("name")))
+		std::string textureID = pTilesetRoot->Attribute("name");
+		std::string textureSource = path + pTilesetRoot->FirstChildElement()->Attribute("source");
+
+		if (TextureManager::get()->load(textureSource, textureID))
 		{
-			Debugger::log("Could not load texture \"" + std::string(pTilesetRoot->FirstChildElement()->Attribute("source")) + "\".", Debugger::ERROR);
+			textureIDs.push_back(textureID);
+		}
+		else
+		{
+			Debugger::log("Could not load texture \"" + textureSource + "\".", Debugger::ERROR);
 			return;
 		}
 
@@ -781,12 +751,20 @@ namespace rgl
 		layers.push_back(pTileLayer);
 	}
 
-	void LevelParser::parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::string path)
+	void LevelParser::parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::vector<std::string>& textureIDs, std::string path)
 	{
 		for (tinyxml2::XMLElement* e = pPropertiesRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
 			if (e->Value() == std::string("property"))
-				TextureManager::getInstance()->load(path + e->Attribute("value"), e->Attribute("name"));
+			{
+				std::string textureID = e->Attribute("name");
+				std::string textureSource = path + e->Attribute("value");
+				
+				if (TextureManager::get()->load(textureSource, textureID))
+					textureIDs.push_back(textureID);
+				else
+					Debugger::log("Could not load texture \"" + textureSource + "\".", Debugger::ERROR);
+			}
 		}
 	}
 
@@ -798,12 +776,15 @@ namespace rgl
 		{
 			if (e->Value() == std::string("object"))
 			{
-				int x = e->IntAttribute("x");
-				int y = e->IntAttribute("y");
-				int width, height, numFrames, callbackID, animSpeed;
-				std::string textureID;
+				std::shared_ptr<GameObject> pGameObject = ObjectFactory::get()->create(e->Attribute("type"));
 
-				std::shared_ptr<GameObject> pGameObject = ObjectFactory::getInstance()->create(e->Attribute("type"));
+				if (!pGameObject)
+					continue;
+
+				std::shared_ptr<ObjectParams> pParams = std::make_shared<ObjectParams>();
+
+				for (const tinyxml2::XMLAttribute* a = e->FirstAttribute(); a != 0; a = a->Next())
+					pParams->setParam(a->Name(), a->Value());
 
 				for (tinyxml2::XMLElement* properties = e->FirstChildElement(); properties != 0; properties = properties->NextSiblingElement())
 				{
@@ -812,27 +793,12 @@ namespace rgl
 						for (tinyxml2::XMLElement* property = properties->FirstChildElement(); property != 0; property = property->NextSiblingElement())
 						{
 							if (property->Value() == std::string("property"))
-							{
-								std::string nameAttribute = property->Attribute("name");
-
-								if (nameAttribute == "textureWidth")
-									width = property->IntAttribute("value");
-								else if (nameAttribute == "textureHeight")
-									height = property->IntAttribute("value");
-								else if (nameAttribute == "numFrames")
-									numFrames = property->IntAttribute("value");
-								else if (nameAttribute == "callbackID")
-									callbackID = property->IntAttribute("value");
-								else if (nameAttribute == "animSpeed")
-									animSpeed = property->IntAttribute("value");
-								else if (nameAttribute == "textureID")
-									textureID = property->Attribute("value");
-							}
+								pParams->setParam(property->Attribute("name"), property->Attribute("value"));
 						}
 					}
 				}
 
-				pGameObject->load(std::make_shared<ObjectParams>(x, y, width, height, numFrames, textureID, callbackID, animSpeed));
+				pGameObject->load(pParams);
 				pObjectLayer->getGameObjects().push_back(pGameObject);
 			}
 		}
@@ -845,7 +811,7 @@ namespace rgl
 		tinyxml2::XMLDocument xmlDoc;
 		xmlDoc.LoadFile((path + file).c_str());
 
-		std::shared_ptr<Level> pLevel = std::make_shared<Level>(Level());
+		std::shared_ptr<Level> pLevel = std::make_shared<Level>();
 
 		tinyxml2::XMLElement* pRoot = xmlDoc.RootElement();
 
@@ -856,9 +822,9 @@ namespace rgl
 		for (tinyxml2::XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
 			if (e->Value() == std::string("properties"))
-				parseTextures(e, path);
+				parseTextures(e, pLevel->getTextureIDs(), path);
 			else if (e->Value() == std::string("tileset"))
-				parseTilesets(e, pLevel->getTilesets(), path);
+				parseTilesets(e, pLevel->getTilesets(), pLevel->getTextureIDs(), path);
 			else if (e->Value() == std::string("layer"))
 				parseTileLayer(e, pLevel->getLayers(), pLevel->getTilesets());
 			else if (e->Value() == std::string("objectgroup"))
@@ -870,58 +836,31 @@ namespace rgl
 
 	// ObjectParams
 
-	ObjectParams::ObjectParams(int x, int y, int width, int height, int numFrames, std::string textureID,
-		int callbackID, int animSpeed)
-		: m_x(x), m_y(y), m_width(width), m_height(height), m_numFrames(numFrames), m_textureID(textureID),
-		m_callbackID(callbackID), m_animSpeed(animSpeed)
+	void ObjectParams::setParam(std::string name, std::string value)
 	{
+		m_params[name] = value;
 	}
 
-	int ObjectParams::getX() const
+	std::string ObjectParams::getStringParam(std::string name)
 	{
-		return m_x;
+		return m_params[name];
 	}
 
-	int ObjectParams::getY() const
+	int ObjectParams::getIntParam(std::string name)
 	{
-		return m_y;
+		return std::atoi(m_params[name].c_str());
 	}
 
-	int ObjectParams::getWidth() const
+	double ObjectParams::getDoubleParam(std::string name)
 	{
-		return m_width;
-	}
-
-	int ObjectParams::getHeight() const
-	{
-		return m_height;
-	}
-
-	int ObjectParams::getNumFrames() const
-	{
-		return m_numFrames;
-	}
-
-	int ObjectParams::getAnimSpeed() const
-	{
-		return m_animSpeed;
-	}
-
-	int ObjectParams::getCallbackID() const
-	{
-		return m_callbackID;
-	}
-
-	std::string ObjectParams::getTextureID() const
-	{
-		return m_textureID;
+		return std::atof(m_params[name].c_str());
 	}
 
 	// ObjectFactory
 
 	ObjectFactory* ObjectFactory::m_pInstance = 0;
 
-	ObjectFactory* ObjectFactory::getInstance()
+	ObjectFactory* ObjectFactory::get()
 	{
 		if (m_pInstance == 0)
 			m_pInstance = new ObjectFactory();
@@ -955,54 +894,53 @@ namespace rgl
 		return pCreator->createObject();
 	}
 
-	// GameActor
+	// GameObject
 
-	GameActor::GameActor()
-		: GameObject()
+	GameObject::GameObject()
 	{
 	}
 
-	void GameActor::load(const std::shared_ptr<ObjectParams> pObjectParams)
+	void GameObject::load(const std::shared_ptr<ObjectParams> pObjectParams)
 	{
-		m_position = Vector2(pObjectParams->getX(), pObjectParams->getY());
+		m_position = Vector2(pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"));
 
 		m_velocity = Vector2(0, 0);
 		m_acceleration = Vector2(0, 0);
 
-		m_width = pObjectParams->getWidth();
-		m_height = pObjectParams->getHeight();
+		m_width = pObjectParams->getIntParam("width");
+		m_height = pObjectParams->getIntParam("height");
 
-		m_textureID = pObjectParams->getTextureID();
+		m_textureID = pObjectParams->getStringParam("textureID");
 
 		m_currentRow = 0;
 		m_currentFrame = 0;
 
-		m_numFrames = pObjectParams->getNumFrames();
+		m_numFrames = pObjectParams->getIntParam("numFrames");
 	}
 
-	void GameActor::update()
+	void GameObject::update()
 	{
 		m_velocity += m_acceleration;
 		m_position += m_velocity;
 	}
 
-	void GameActor::draw()
+	void GameObject::draw()
 	{
-		TextureManager::getInstance()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
+		TextureManager::get()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
 			m_width, m_height, m_currentRow, m_currentFrame);
 	}
 
-	Vector2& GameActor::getPosition()
+	Vector2& GameObject::getPosition()
 	{
 		return m_position;
 	}
 
-	int GameActor::getWidth()
+	int GameObject::getWidth()
 	{
 		return m_width;
 	}
 
-	int GameActor::getHeight()
+	int GameObject::getHeight()
 	{
 		return m_height;
 	}
@@ -1011,27 +949,28 @@ namespace rgl
 
 	void Button::load(const std::shared_ptr<ObjectParams> pObjectParams)
 	{
-		GameActor::load(pObjectParams);
-		m_callbackID = pObjectParams->getCallbackID();
+		GameObject::load(pObjectParams);
+		m_callbackID = pObjectParams->getIntParam("callbackID");
 		m_currentFrame = MOUSE_AWAY;
 	}
 
 	void Button::update()
 	{
-		std::shared_ptr<Vector2> pMousePos = InputHandler::getInstance()->getMousePosition();
+		std::shared_ptr<Vector2> pMousePos = InputHandler::get()->getMousePosition();
 
 		if (pMousePos->getX() < (m_position.getX() + m_width) &&
 			pMousePos->getX() > m_position.getX() &&
 			pMousePos->getY() < (m_position.getY() + m_height) &&
 			pMousePos->getY() > m_position.getY())
 		{
-			if (InputHandler::getInstance()->getMouseButtonState(InputHandler::LEFT))
+			if (InputHandler::get()->getMouseButtonState(InputHandler::LEFT))
 			{
 				if (!m_pressed)
 				{
 					m_currentFrame = MOUSE_PRESSED;
 
-					m_callback();
+					if (m_callback)
+						m_callback();
 
 					m_pressed = true;
 				}
@@ -1050,15 +989,15 @@ namespace rgl
 
 	void Button::draw()
 	{
-		GameActor::draw();
+		GameObject::draw();
 	}
 
 	void Button::clean()
 	{
-		GameActor::clean();
+		GameObject::clean();
 	}
 
-	void Button::setCallback(void(*callback)())
+	void Button::setCallback(std::function<void()> callback)
 	{
 		m_callback = callback;
 	}

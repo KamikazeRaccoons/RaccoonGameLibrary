@@ -14,34 +14,19 @@ namespace rgl
 	{
 	private:
 
-		int m_x;
-		int m_y;
-
-		int m_width;
-		int m_height;
-
-		int m_numFrames;
-		int m_animSpeed;
-
-		int m_callbackID;
-
-		std::string m_textureID;
+		std::map<std::string, std::string> m_params;
 
 	public:
 
-		RGL_OBJECTPARAMS_API ObjectParams(int x, int y, int width, int height, int numFrames, std::string textureID, int callbackID = 0, int animSpeed = 0);
+		ObjectParams() { }
+		~ObjectParams() { }
 
-		RGL_OBJECTPARAMS_API int getX() const;
-		RGL_OBJECTPARAMS_API int getY() const;
+		RGL_OBJECTPARAMS_API void setParam(std::string name, std::string value);
+		//RGL_OBJECTPARAMS_API ObjectParams* setParam(std::string key, int value);
+		//RGL_OBJECTPARAMS_API ObjectParams* setParam(std::string key, double value);
+		RGL_OBJECTPARAMS_API std::string getStringParam(std::string name);
+		RGL_OBJECTPARAMS_API int getIntParam(std::string name);
+		RGL_OBJECTPARAMS_API double getDoubleParam(std::string name);
 
-		RGL_OBJECTPARAMS_API int getWidth() const;
-		RGL_OBJECTPARAMS_API int getHeight() const;
-
-		RGL_OBJECTPARAMS_API int getNumFrames() const;
-		RGL_OBJECTPARAMS_API int getAnimSpeed() const;
-
-		RGL_OBJECTPARAMS_API int getCallbackID() const;
-
-		RGL_OBJECTPARAMS_API std::string getTextureID() const;
 	};
 }
