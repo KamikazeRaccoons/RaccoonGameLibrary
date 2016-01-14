@@ -22,8 +22,6 @@ namespace rgl
 		~ObjectParams() { }
 
 		RGL_OBJECTPARAMS_API void setParam(std::string name, std::string value);
-		//RGL_OBJECTPARAMS_API ObjectParams* setParam(std::string key, int value);
-		//RGL_OBJECTPARAMS_API ObjectParams* setParam(std::string key, double value);
 		RGL_OBJECTPARAMS_API std::string getStringParam(std::string name);
 		RGL_OBJECTPARAMS_API int getIntParam(std::string name);
 		RGL_OBJECTPARAMS_API double getDoubleParam(std::string name);

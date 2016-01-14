@@ -25,6 +25,8 @@ namespace rgl
 		std::vector<std::shared_ptr<GameState>> m_gameStates;
 		std::vector<std::pair<TransitionType, std::shared_ptr<GameState>>> m_queuedTransitions;
 
+		RGL_GAMESTATEMACHINE_API void pollTransitions();
+
 	public:
 
 		GameStateMachine() { }

@@ -438,26 +438,8 @@ namespace rgl
 
 	// GameStateMachine
 
-	void GameStateMachine::pushState(std::shared_ptr<GameState> pGameState)
+	void GameStateMachine::pollTransitions()
 	{
-		m_queuedTransitions.push_back(std::make_pair(PUSH, pGameState));
-	}
-
-	void GameStateMachine::changeState(std::shared_ptr<GameState> pGameState)
-	{
-		m_queuedTransitions.push_back(std::make_pair(CHANGE, pGameState));
-	}
-
-	void GameStateMachine::popState()
-	{
-		m_queuedTransitions.push_back(std::make_pair<TransitionType, std::shared_ptr<GameState>>(POP, 0));
-	}
-
-	void GameStateMachine::update()
-	{
-		if (!m_gameStates.empty())
-			m_gameStates.back()->update();
-
 		for (unsigned int i = 0; i < m_queuedTransitions.size(); i++)
 		{
 			switch (m_queuedTransitions[i].first)
@@ -492,6 +474,29 @@ namespace rgl
 		m_queuedTransitions.clear();
 	}
 
+	void GameStateMachine::pushState(std::shared_ptr<GameState> pGameState)
+	{
+		m_queuedTransitions.push_back(std::make_pair(PUSH, pGameState));
+	}
+
+	void GameStateMachine::changeState(std::shared_ptr<GameState> pGameState)
+	{
+		m_queuedTransitions.push_back(std::make_pair(CHANGE, pGameState));
+	}
+
+	void GameStateMachine::popState()
+	{
+		m_queuedTransitions.push_back(std::make_pair<TransitionType, std::shared_ptr<GameState>>(POP, 0));
+	}
+
+	void GameStateMachine::update()
+	{
+		if (!m_gameStates.empty())
+			m_gameStates.back()->update();
+
+		pollTransitions();
+	}
+
 	void GameStateMachine::render()
 	{
 		if (!m_gameStates.empty())
@@ -503,7 +508,7 @@ namespace rgl
 		while (!m_gameStates.empty())
 		{
 			popState();
-			update();
+			pollTransitions();
 		}
 	}
 
@@ -581,7 +586,7 @@ namespace rgl
 
 	void TileLayer::update()
 	{
-		m_velocity.setX(1);
+		m_position += m_velocity;
 	}
 
 	void TileLayer::render()

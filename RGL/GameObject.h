@@ -5,9 +5,9 @@
 #include "Vector2.h"
 
 #ifdef RGL_EXPORTS
-#define RGL_GAMEACTOR_API __declspec(dllexport)
+#define RGL_GAMEOBJECT_API __declspec(dllexport)
 #else
-#define RGL_GAMEACTOR_API __declspec(dllimport)
+#define RGL_GAMEOBJECT_API __declspec(dllimport)
 #endif
 
 namespace rgl
@@ -32,18 +32,18 @@ namespace rgl
 
 	public:
 
-		RGL_GAMEACTOR_API GameObject();
+		RGL_GAMEOBJECT_API GameObject();
 		virtual ~GameObject() { }
 
-		virtual RGL_GAMEACTOR_API void load(const std::shared_ptr<ObjectParams> pObjectParams);
+		virtual RGL_GAMEOBJECT_API void load(const std::shared_ptr<ObjectParams> pObjectParams);
 
-		virtual RGL_GAMEACTOR_API void update();
-		virtual RGL_GAMEACTOR_API void draw();
+		virtual RGL_GAMEOBJECT_API void update();
+		virtual RGL_GAMEOBJECT_API void draw();
 		virtual void clean() { }
 
-		RGL_GAMEACTOR_API Vector2& getPosition();
-		RGL_GAMEACTOR_API int getWidth();
-		RGL_GAMEACTOR_API int getHeight();
+		RGL_GAMEOBJECT_API Vector2& getPosition();
+		RGL_GAMEOBJECT_API int getWidth();
+		RGL_GAMEOBJECT_API int getHeight();
 
 	};
 }
