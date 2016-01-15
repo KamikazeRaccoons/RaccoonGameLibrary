@@ -21,7 +21,10 @@ void ExampleState::onEnter()
 	m_pLevel = levelParser.parseLevel("assets/levels/map1/", "map1.tmx");
 
 	m_pLevel->addCallback(quitState);
+	m_pLevel->addCallback(playShoot);
 	m_pLevel->assignCallbacks();
+
+	rgl::SoundManager::get()->load("assets/sounds/Gunshot.wav", "Gunshot", rgl::SoundManager::SFX);
 }
 
 void ExampleState::onExit()
@@ -37,4 +40,9 @@ std::string ExampleState::getStateID() const
 void ExampleState::quitState()
 {
 	rgl::Game::get()->quit();
+}
+
+void ExampleState::playShoot()
+{
+	rgl::SoundManager::get()->playSound("Gunshot", 0);
 }

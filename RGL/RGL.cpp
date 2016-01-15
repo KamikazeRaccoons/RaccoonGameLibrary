@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "InputHandler.h"
 #include "TextureManager.h"
+#include "SoundManager.h"
 #include "Debugger.h"
 #include "Vector2.h"
 #include "GameState.h"
@@ -76,6 +77,8 @@ namespace rgl
 			(m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == 0)
 			return false;
 
+		SoundManager::get()->init();
+
 		m_width = width;
 		m_height = height;
 		m_deltaTime = 1.0 / frameRate;
@@ -139,6 +142,8 @@ namespace rgl
 	void Game::clean()
 	{
 		m_pGameStateMachine->clean();
+		SoundManager::get()->clean();
+
 		SDL_DestroyRenderer(m_pRenderer);
 		SDL_DestroyWindow(m_pWindow);
 		SDL_Quit();
@@ -318,6 +323,80 @@ namespace rgl
 		destRect.y = y;
 
 		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, SDL_FLIP_NONE);
+	}
+
+	// SoundManager
+
+	SoundManager* SoundManager::m_pInstance = 0;
+
+	SoundManager* SoundManager::get()
+	{
+		if (m_pInstance == 0)
+			m_pInstance = new SoundManager();
+
+		return m_pInstance;
+	}
+
+	void SoundManager::init()
+	{
+		Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024);
+	}
+
+	bool SoundManager::load(std::string fileName, std::string id, SoundManager::SoundType soundType)
+	{
+		if (soundType == MUSIC)
+		{
+			Mix_Music* pMusic = Mix_LoadMUS(fileName.c_str());
+
+			if (pMusic == 0)
+			{
+				Debugger::log("Could not load music from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::ERROR);
+				return false;
+			}
+
+			m_music[id] = pMusic;
+
+			return true;
+		}
+		else if (soundType == SFX)
+		{
+			Mix_Chunk* pChunk = Mix_LoadWAV(fileName.c_str());
+
+			if (pChunk == 0)
+			{
+				Debugger::log("Could not load SFX from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::ERROR);
+				return false;
+			}
+
+			m_sfxs[id] = pChunk;
+			
+			return true;;
+		}
+	}
+
+	void SoundManager::clean()
+	{
+		for (std::map<std::string, Mix_Music*>::iterator it = m_music.begin(); it != m_music.end(); ++it)
+			Mix_FreeMusic(it->second);
+
+		m_music.clear();
+
+		for (std::map<std::string, Mix_Chunk*>::iterator it = m_sfxs.begin(); it != m_sfxs.end(); ++it)
+			Mix_FreeChunk(it->second);
+
+		m_sfxs.clear();
+
+		Mix_CloseAudio();
+	}
+
+	void SoundManager::playMusic(std::string id, int loops)
+	{
+		Mix_PlayMusic(m_music[id], loops);
+	}
+
+	void SoundManager::playSound(std::string id, int loops)
+	{
+		Mix_PlayChannel(-1, m_sfxs[id], loops);
 	}
 
 	// Debugger
@@ -781,7 +860,15 @@ namespace rgl
 		{
 			if (e->Value() == std::string("object"))
 			{
-				std::shared_ptr<GameObject> pGameObject = ObjectFactory::get()->create(e->Attribute("type"));
+				const char* typeAttribute = e->Attribute("type");
+
+				if (typeAttribute == 0)
+				{
+					Debugger::log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::ERROR);
+					continue;
+				}
+
+				std::shared_ptr<GameObject> pGameObject = ObjectFactory::get()->create(typeAttribute);
 
 				if (!pGameObject)
 					continue;

@@ -24,6 +24,7 @@
 // SDL Header Files:
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 // TinyXML2 Header Files:
 #include "tinyxml2.h"

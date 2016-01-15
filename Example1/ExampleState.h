@@ -10,7 +10,10 @@ private:
 
 	std::shared_ptr<rgl::Level> m_pLevel;
 
+	bool m_pressed;
+
 	static void quitState();
+	static void playShoot();
 
 public:
 

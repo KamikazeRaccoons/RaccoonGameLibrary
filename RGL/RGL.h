@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "InputHandler.h"
 #include "TextureManager.h"
+#include "SoundManager.h"
 #include "Debugger.h"
 #include "Vector2.h"
 #include "GameState.h"
