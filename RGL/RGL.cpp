@@ -357,8 +357,6 @@ namespace rgl
 			}
 
 			m_music[id] = pMusic;
-
-			return true;
 		}
 		else if (soundType == SFX)
 		{
@@ -371,9 +369,9 @@ namespace rgl
 			}
 
 			m_sfxs[id] = pChunk;
-			
-			return true;;
 		}
+
+		return true;
 	}
 
 	void SoundManager::clean()
