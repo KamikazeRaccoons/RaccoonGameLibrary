@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\RGL;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\Debug;$(LibraryPath);C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_mixer-2.0.1\lib\x86</LibraryPath>
+    <IncludePath>C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.0\include;C:\RaccoonGameLibrary\RGL;C:\zlib1.2.8-dll\include;C:\SDL2\SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\zlib1.2.8-dll\lib;C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.0\lib\x86;C:\RaccoonGameLibrary\Debug;$(LibraryPath);C:\SDL2\SDL2_mixer-2.0.1\lib\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\include;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\RGL;C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\include;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Mackinnon Buck\Documents\zlib1.2.8-dll\lib;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2-2.0.4\lib\x86;C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_image-2.0.0\lib\x86;C:\Users\Mackinnon Buck\Documents\GitHub\RaccoonGameLibrary\Release;$(LibraryPath);C:\Users\Mackinnon Buck\Documents\SDL2\SDL2_mixer-2.0.1\lib\x86</LibraryPath>
+    <IncludePath>C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.0\include;C:\RaccoonGameLibrary\RGL;C:\zlib1.2.8-dll\include;C:\SDL2\SDL2_mixer-2.0.1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\zlib1.2.8-dll\lib;C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.0\lib\x86;C:\RaccoonGameLibrary\Release;$(LibraryPath);C:\SDL2\SDL2_mixer-2.0.1\lib\x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

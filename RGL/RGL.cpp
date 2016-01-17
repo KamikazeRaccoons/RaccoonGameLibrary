@@ -19,6 +19,8 @@
 #include "GameObject.h"
 #include "Button.h"
 
+// TODO: Implement Box2D for physics and collision checking for non-physical objects.
+
 namespace rgl
 {
 	// Game
