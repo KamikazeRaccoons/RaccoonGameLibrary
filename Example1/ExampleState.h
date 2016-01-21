@@ -6,8 +6,6 @@ class ExampleState : public rgl::GameState
 {
 private:
 
-	static std::string m_stateID;
-
 	std::shared_ptr<rgl::Level> m_pLevel;
 
 	bool m_pressed;

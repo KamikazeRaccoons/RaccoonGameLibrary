@@ -1,7 +1,5 @@
 #include "ExampleState.h"
 
-std::string ExampleState::m_stateID = "ExampleState";
-
 void ExampleState::update()
 {
 	m_pLevel->update();
@@ -22,7 +20,6 @@ void ExampleState::onEnter()
 
 	m_pLevel->addCallback(quitState);
 	m_pLevel->addCallback(playShoot);
-	m_pLevel->assignCallbacks();
 
 	rgl::SoundManager::get()->load("assets/sounds/Gunshot.wav", "Gunshot", rgl::SoundManager::SFX);
 }
@@ -34,7 +31,7 @@ void ExampleState::onExit()
 
 std::string ExampleState::getStateID() const
 {
-	return m_stateID;
+	return "ExampleState";
 }
 
 void ExampleState::quitState()

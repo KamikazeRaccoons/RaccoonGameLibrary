@@ -34,3 +34,6 @@
 
 // zlib Header Files:
 #include <zlib.h>
+
+// Box2D Header Files:
+#include <Box2D\Box2D.h>

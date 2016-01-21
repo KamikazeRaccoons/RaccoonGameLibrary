@@ -8,7 +8,6 @@
 #include "SoundManager.h"
 #include "Debugger.h"
 #include "Vector2.h"
-#include "GameState.h"
 #include "GameStateMachine.h"
 #include "Level.h"
 #include "TileLayer.h"
@@ -17,9 +16,8 @@
 #include "ObjectParams.h"
 #include "ObjectFactory.h"
 #include "GameObject.h"
+#include "GameActor.h"
 #include "Button.h"
-
-// TODO: Implement Box2D for physics and collision checking for non-physical objects.
 
 namespace rgl
 {
@@ -376,13 +374,13 @@ namespace rgl
 
 	void SoundManager::clean()
 	{
-		for (std::map<std::string, Mix_Music*>::iterator it = m_music.begin(); it != m_music.end(); ++it)
-			Mix_FreeMusic(it->second);
+		for (auto music : m_music)
+			Mix_FreeMusic(music.second);
 
 		m_music.clear();
 
-		for (std::map<std::string, Mix_Chunk*>::iterator it = m_sfxs.begin(); it != m_sfxs.end(); ++it)
-			Mix_FreeChunk(it->second);
+		for (auto sfx : m_sfxs)
+			Mix_FreeChunk(sfx.second);
 
 		m_sfxs.clear();
 
@@ -519,25 +517,25 @@ namespace rgl
 
 	void GameStateMachine::pollTransitions()
 	{
-		for (unsigned int i = 0; i < m_queuedTransitions.size(); i++)
+		for (auto transition : m_queuedTransitions)
 		{
-			switch (m_queuedTransitions[i].first)
+			switch (transition.first)
 			{
 			case PUSH:
-				m_gameStates.push_back(m_queuedTransitions[i].second);
+				m_gameStates.push_back(transition.second);
 				m_gameStates.back()->onEnter();
 				break;
 			case CHANGE:
 				if (!m_gameStates.empty())
 				{
-					if (m_gameStates.back()->getStateID() == m_queuedTransitions[i].second->getStateID())
+					if (m_gameStates.back()->getStateID() == transition.second->getStateID())
 						break;
 
 					m_gameStates.back()->onExit();
 					m_gameStates.pop_back();
 				}
 
-				m_gameStates.push_back(m_queuedTransitions[i].second);
+				m_gameStates.push_back(transition.second);
 				m_gameStates.back()->onEnter();
 				break;
 			case POP:
@@ -593,25 +591,74 @@ namespace rgl
 
 	// Level
 
+	void Level::pollOperations()
+	{
+		for (auto operation : m_queuedOperations)
+		{
+			switch (std::get<0>(operation))
+			{
+			case ADD:
+				{
+					std::vector<std::shared_ptr<ObjectLayer>> objectLayers;
+
+					for (auto layer : m_layers)
+					{
+						std::shared_ptr<ObjectLayer> pObjectLayer = std::dynamic_pointer_cast<ObjectLayer>(layer);
+
+						if (pObjectLayer)
+							objectLayers.push_back(pObjectLayer);
+					}
+
+					if (std::get<2>(operation) < (int)objectLayers.size())
+					{
+						if (std::get<2>(operation) < 0)
+							objectLayers.back()->getGameObjects().push_back(std::get<1>(operation));
+						else
+							objectLayers[std::get<2>(operation)]->getGameObjects().push_back(std::get<1>(operation));
+
+						std::get<1>(operation)->onCreate();
+					}
+				}
+				break;
+			case REMOVE:
+				for (auto layer : m_layers)
+				{
+					std::shared_ptr<ObjectLayer> pObjectLayer = std::dynamic_pointer_cast<ObjectLayer>(layer);
+
+					if (pObjectLayer)
+					{
+						std::vector<std::shared_ptr<GameObject>>& gameObjects = pObjectLayer->getGameObjects();
+						gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), std::get<1>(operation)), gameObjects.end());
+					}
+				}
+				break;
+			}
+		}
+
+		m_queuedOperations.clear();
+	}
+
 	void Level::update()
 	{
-		for (unsigned int i = 0; i < m_layers.size(); i++)
-			m_layers[i]->update();
+		for (auto layer : m_layers)
+			layer->update();
+
+		pollOperations();
 	}
 
 	void Level::render()
 	{
-		for (unsigned int i = 0; i < m_layers.size(); i++)
-			m_layers[i]->render();
+		for (auto layer : m_layers)
+			layer->render();
 	}
 
 	void Level::clean()
 	{
-		for (unsigned int i = 0; i < m_layers.size(); i++)
-			m_layers[i]->clean();
+		for (auto layer : m_layers)
+			layer->clean();
 
-		for (unsigned int i = 0; i < m_textureIDs.size(); i++)
-			rgl::TextureManager::get()->unload(m_textureIDs[i]);
+		for (auto textureID : m_textureIDs)
+			rgl::TextureManager::get()->unload(textureID);
 	}
 
 	void Level::addCallback(std::function<void()> callback)
@@ -619,39 +666,40 @@ namespace rgl
 		m_callbacks.push_back(callback);
 	}
 
-	void Level::assignCallbacks()
+	std::function<void()> Level::getCallback(int callbackID)
 	{
-		for (unsigned int i = 0; i < m_layers.size(); i++)
-		{
-			std::shared_ptr<ObjectLayer> pObjectLayer = std::dynamic_pointer_cast<ObjectLayer>(m_layers[i]);
+		if (callbackID >= (int)m_callbacks.size())
+			return std::function<void()>();
 
-			if (!pObjectLayer)
-				continue;
+		return m_callbacks[callbackID];
+	}
 
-			for (unsigned int j = 0; j < pObjectLayer->getGameObjects().size(); j++)
-			{
-				std::shared_ptr<Button> pButton = std::dynamic_pointer_cast<Button>(pObjectLayer->getGameObjects()[j]);
+	void Level::addLayer(std::shared_ptr<Layer> pLayer)
+	{
+		m_layers.push_back(pLayer);
+	}
 
-				if (pButton && pButton->getCallbackID() < (int)m_callbacks.size())
-					pButton->setCallback(m_callbacks[pButton->getCallbackID()]);
-			}
-		}
+	void Level::addTexture(std::string file, std::string textureID)
+	{
+		if (TextureManager::get()->load(file, textureID))
+			m_textureIDs.push_back(textureID);
+		else
+			Debugger::log("Could not load texture \"" + file + "\".", Debugger::ERROR);
+	}
+
+	void Level::addObject(std::shared_ptr<GameObject> pObject, int objectLayer)
+	{
+		m_queuedOperations.push_back(std::make_tuple(ADD, pObject, objectLayer));
+	}
+
+	void Level::removeObject(std::shared_ptr<GameObject> pObject)
+	{
+		m_queuedOperations.push_back(std::make_tuple(REMOVE, pObject, 0));
 	}
 
 	std::vector<Tileset>& Level::getTilesets()
 	{
-		
 		return m_tilesets;
-	}
-
-	std::vector<std::shared_ptr<Layer>>& Level::getLayers()
-	{
-		return m_layers;
-	}
-
-	std::vector<std::string>& Level::getTextureIDs()
-	{
-		return m_textureIDs;
 	}
 
 	// TileLayer
@@ -742,40 +790,29 @@ namespace rgl
 
 	void ObjectLayer::update()
 	{
-		for (unsigned int i = 0; i < m_gameObjects.size(); i++)
-			m_gameObjects[i]->update();
+		for (auto object : m_gameObjects)
+			object->update();
 	}
 
 	void ObjectLayer::render()
 	{
-		for (unsigned int i = 0; i < m_gameObjects.size(); i++)
-			m_gameObjects[i]->draw();
+		for (auto object : m_gameObjects)
+			object->draw();
 	}
 
 	void ObjectLayer::clean()
 	{
-		for (unsigned int i = 0; i < m_gameObjects.size(); i++)
-			m_gameObjects[i]->clean();
+		for (auto object : m_gameObjects)
+			object->clean();
 
 		m_gameObjects.clear();
 	}
 
 	// LevelParser
 
-	void LevelParser::parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::vector<Tileset>& tilesets, std::vector<std::string>& textureIDs, std::string path)
+	void LevelParser::parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::shared_ptr<Level> pLevel, std::string path)
 	{
-		std::string textureID = pTilesetRoot->Attribute("name");
-		std::string textureSource = path + pTilesetRoot->FirstChildElement()->Attribute("source");
-
-		if (TextureManager::get()->load(textureSource, textureID))
-		{
-			textureIDs.push_back(textureID);
-		}
-		else
-		{
-			Debugger::log("Could not load texture \"" + textureSource + "\".", Debugger::ERROR);
-			return;
-		}
+		pLevel->addTexture(path + pTilesetRoot->FirstChildElement()->Attribute("source"), pTilesetRoot->Attribute("name"));
 
 		Tileset tileset;
 		tileset.width = pTilesetRoot->FirstChildElement()->IntAttribute("width");
@@ -788,13 +825,12 @@ namespace rgl
 		tileset.name = pTilesetRoot->Attribute("name");
 		tileset.numColumns = tileset.width / (tileset.tileWidth + tileset.spacing);
 
-		tilesets.push_back(tileset);
+		pLevel->getTilesets().push_back(tileset);
 	}
 
-	void LevelParser::parseTileLayer(tinyxml2::XMLElement* pTileElement, std::vector<std::shared_ptr<Layer>>& layers,
-		const std::vector<Tileset>& tilesets)
+	void LevelParser::parseTileLayer(tinyxml2::XMLElement* pTileElement, std::shared_ptr<Level> pLevel)
 	{
-		std::shared_ptr<TileLayer> pTileLayer = std::make_shared<TileLayer>(m_tileSize, tilesets);
+		std::shared_ptr<TileLayer> pTileLayer = std::make_shared<TileLayer>(m_tileSize, pLevel->getTilesets());
 
 		std::vector<std::vector<int>> data;
 
@@ -832,29 +868,19 @@ namespace rgl
 
 		pTileLayer->setTileIDs(data);
 
-		layers.push_back(pTileLayer);
+		pLevel->addLayer(pTileLayer);
 	}
 
-	void LevelParser::parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::vector<std::string>& textureIDs, std::string path)
+	void LevelParser::parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path)
 	{
 		for (tinyxml2::XMLElement* e = pPropertiesRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
-		{
-			if (e->Value() == std::string("property"))
-			{
-				std::string textureID = e->Attribute("name");
-				std::string textureSource = path + e->Attribute("value");
-				
-				if (TextureManager::get()->load(textureSource, textureID))
-					textureIDs.push_back(textureID);
-				else
-					Debugger::log("Could not load texture \"" + textureSource + "\".", Debugger::ERROR);
-			}
-		}
+			if (e->Value() == std::string("property"))				
+				pLevel->addTexture(path + e->Attribute("value"), e->Attribute("name"));
 	}
 
-	void LevelParser::parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::vector<std::shared_ptr<Layer>>& layers)
+	void LevelParser::parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::shared_ptr<Level> pLevel)
 	{
-		std::shared_ptr<ObjectLayer> pObjectLayer = std::make_shared<ObjectLayer>();
+		pLevel->addLayer(std::make_shared<ObjectLayer>());
 
 		for (tinyxml2::XMLElement* e = pObjectGroupRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
@@ -867,11 +893,6 @@ namespace rgl
 					Debugger::log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::ERROR);
 					continue;
 				}
-
-				std::shared_ptr<GameObject> pGameObject = ObjectFactory::get()->create(typeAttribute);
-
-				if (!pGameObject)
-					continue;
 
 				std::shared_ptr<ObjectParams> pParams = std::make_shared<ObjectParams>();
 
@@ -890,12 +911,9 @@ namespace rgl
 					}
 				}
 
-				pGameObject->load(pParams);
-				pObjectLayer->getGameObjects().push_back(pGameObject);
+				pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pLevel, pParams));
 			}
 		}
-
-		layers.push_back(pObjectLayer);
 	}
 
 	std::shared_ptr<Level> LevelParser::parseLevel(std::string path, std::string file)
@@ -914,13 +932,13 @@ namespace rgl
 		for (tinyxml2::XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
 			if (e->Value() == std::string("properties"))
-				parseTextures(e, pLevel->getTextureIDs(), path);
+				parseTextures(e, pLevel, path);
 			else if (e->Value() == std::string("tileset"))
-				parseTilesets(e, pLevel->getTilesets(), pLevel->getTextureIDs(), path);
+				parseTilesets(e, pLevel, path);
 			else if (e->Value() == std::string("layer"))
-				parseTileLayer(e, pLevel->getLayers(), pLevel->getTilesets());
+				parseTileLayer(e, pLevel);
 			else if (e->Value() == std::string("objectgroup"))
-				parseObjectLayers(e, pLevel->getLayers());
+				parseObjectLayers(e, pLevel);
 		}
 
 		return pLevel;
@@ -972,7 +990,7 @@ namespace rgl
 		return true;
 	}
 
-	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID)
+	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams)
 	{
 		std::map<std::string, std::shared_ptr<ObjectCreator>>::iterator it = m_creators.find(typeID);
 
@@ -982,68 +1000,82 @@ namespace rgl
 			return 0;
 		}
 
-		std::shared_ptr<ObjectCreator> pCreator = it->second;
-		return pCreator->createObject();
+		return it->second->createObject(pParentLevel, pObjectParams);
 	}
 
 	// GameObject
 
-	GameObject::GameObject()
+	GameObject::GameObject(std::shared_ptr<Level> pParentLevel)
 	{
+		m_pLevel = pParentLevel;
 	}
 
-	void GameObject::load(const std::shared_ptr<ObjectParams> pObjectParams)
+	// GameActor
+
+	GameActor::GameActor(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int numFrames)
+		: GameObject(pParentLevel)
 	{
-		m_position = Vector2(pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"));
+		m_position = Vector2(x, y);
 
 		m_velocity = Vector2(0, 0);
 		m_acceleration = Vector2(0, 0);
 
-		m_width = pObjectParams->getIntParam("width");
-		m_height = pObjectParams->getIntParam("height");
+		m_width = width;
+		m_height = height;
 
-		m_textureID = pObjectParams->getStringParam("textureID");
+		m_textureID = textureID;
 
 		m_currentRow = 0;
 		m_currentFrame = 0;
 
-		m_numFrames = pObjectParams->getIntParam("numFrames");
+		m_numFrames = numFrames;
 	}
 
-	void GameObject::update()
+	void GameActor::update()
 	{
 		m_velocity += m_acceleration;
 		m_position += m_velocity;
 	}
 
-	void GameObject::draw()
+	void GameActor::draw()
 	{
 		TextureManager::get()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
 			m_width, m_height, m_currentRow, m_currentFrame);
 	}
 
-	Vector2& GameObject::getPosition()
+	Vector2& GameActor::getPosition()
 	{
 		return m_position;
 	}
 
-	int GameObject::getWidth()
+	int GameActor::getWidth()
 	{
 		return m_width;
 	}
 
-	int GameObject::getHeight()
+	int GameActor::getHeight()
 	{
 		return m_height;
 	}
 
 	// Button
 
-	void Button::load(const std::shared_ptr<ObjectParams> pObjectParams)
+	Button::Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID)
+		: GameActor(pParentLevel, x, y, width, height, textureID, 3)
 	{
-		GameObject::load(pObjectParams);
-		m_callbackID = pObjectParams->getIntParam("callbackID");
+		m_callbackID = callbackID;
 		m_currentFrame = MOUSE_AWAY;
+	}
+
+	void Button::onCreate()
+	{
+		GameActor::onCreate();
+		m_callback = m_pLevel->getCallback(m_callbackID);
+	}
+
+	void Button::onDestroy()
+	{
+		GameActor::onDestroy();
 	}
 
 	void Button::update()
@@ -1078,15 +1110,15 @@ namespace rgl
 			m_currentFrame = MOUSE_AWAY;
 		}
 	}
-
+	
 	void Button::draw()
 	{
-		GameObject::draw();
+		GameActor::draw();
 	}
 
 	void Button::clean()
 	{
-		GameObject::clean();
+		GameActor::clean();
 	}
 
 	void Button::setCallback(std::function<void()> callback)

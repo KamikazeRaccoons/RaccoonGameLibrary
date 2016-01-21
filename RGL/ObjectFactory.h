@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "ObjectParams.h"
 #include "GameObject.h"
 
 #ifdef RGL_EXPORTS
@@ -15,7 +16,7 @@ namespace rgl
 	{
 	public:
 
-		virtual std::shared_ptr<GameObject> createObject() const = 0;
+		virtual std::shared_ptr<GameObject> createObject(std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams) const = 0;
 		virtual ~ObjectCreator() { }
 
 	};
@@ -36,7 +37,7 @@ namespace rgl
 		static RGL_OBJECTFACTORY_API ObjectFactory* get();
 
 		RGL_OBJECTFACTORY_API bool registerType(std::string typeID, std::shared_ptr<ObjectCreator> pCreator);
-		RGL_OBJECTFACTORY_API std::shared_ptr<GameObject> create(std::string typeID);
+		RGL_OBJECTFACTORY_API std::shared_ptr<GameObject> create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams);
 
 	};
 }

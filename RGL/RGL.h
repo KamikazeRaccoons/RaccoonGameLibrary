@@ -18,4 +18,5 @@
 #include "ObjectParams.h"
 #include "ObjectFactory.h"
 #include "GameObject.h"
+#include "GameActor.h"
 #include "Button.h"

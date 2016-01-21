@@ -12,38 +12,24 @@
 
 namespace rgl
 {
+	class Level;
+
 	class GameObject
 	{
 	protected:
 
-		Vector2 m_position;
-		Vector2 m_velocity;
-		Vector2 m_acceleration;
+		std::shared_ptr<Level> m_pLevel;
 
-		int m_width;
-		int m_height;
-
-		int m_currentRow;
-		int m_currentFrame;
-
-		int m_numFrames;
-
-		std::string m_textureID;
+		RGL_GAMEOBJECT_API GameObject(std::shared_ptr<Level> pParentLevel);
 
 	public:
 
-		RGL_GAMEOBJECT_API GameObject();
-		virtual ~GameObject() { }
+		virtual void onCreate() = 0;
+		virtual void onDestroy() = 0;
 
-		virtual RGL_GAMEOBJECT_API void load(const std::shared_ptr<ObjectParams> pObjectParams);
-
-		virtual RGL_GAMEOBJECT_API void update();
-		virtual RGL_GAMEOBJECT_API void draw();
-		virtual void clean() { }
-
-		RGL_GAMEOBJECT_API Vector2& getPosition();
-		RGL_GAMEOBJECT_API int getWidth();
-		RGL_GAMEOBJECT_API int getHeight();
+		virtual void update() = 0;
+		virtual void draw() = 0;
+		virtual void clean() = 0;
 
 	};
 }

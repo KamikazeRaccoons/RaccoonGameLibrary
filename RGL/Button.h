@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameObject.h"
+#include "GameActor.h"
 #include "ObjectFactory.h"
 
 #ifdef RGL_EXPORTS
@@ -11,7 +11,7 @@
 
 namespace rgl
 {
-	class Button : public GameObject
+	class Button : public GameActor
 	{
 	private:
 
@@ -29,9 +29,10 @@ namespace rgl
 
 	public:
 
-		Button() : GameObject() { }
+		RGL_BUTTON_API Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID);
 
-		virtual RGL_BUTTON_API void load(const std::shared_ptr<ObjectParams> pObjectParams);
+		virtual RGL_BUTTON_API void onCreate();
+		virtual RGL_BUTTON_API void onDestroy();
 
 		virtual RGL_BUTTON_API void update();
 		virtual RGL_BUTTON_API void draw();
@@ -43,9 +44,11 @@ namespace rgl
 
 	class ButtonCreator : public ObjectCreator
 	{
-		std::shared_ptr<GameObject> createObject() const
+		std::shared_ptr<GameObject> createObject(std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams) const
 		{
-			return std::make_shared<Button>();
+			return std::make_shared<Button>(pParentLevel, pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"),
+				pObjectParams->getIntParam("width"), pObjectParams->getIntParam("height"), pObjectParams->getStringParam("textureID"),
+				pObjectParams->getIntParam("callbackID"));
 		}
 	};
 }
