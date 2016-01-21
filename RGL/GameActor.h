@@ -41,7 +41,6 @@ namespace rgl
 
 		virtual RGL_GAMEACTOR_API void update();
 		virtual RGL_GAMEACTOR_API void draw();
-		virtual void clean() { }
 
 		RGL_GAMEACTOR_API Vector2& getPosition();
 		RGL_GAMEACTOR_API int getWidth();

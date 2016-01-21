@@ -36,7 +36,6 @@ namespace rgl
 
 		virtual RGL_BUTTON_API void update();
 		virtual RGL_BUTTON_API void draw();
-		virtual RGL_BUTTON_API void clean();
 
 		RGL_BUTTON_API void setCallback(std::function<void()> callback);
 		RGL_BUTTON_API int getCallbackID();

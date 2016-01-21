@@ -19,6 +19,8 @@
 #include "GameActor.h"
 #include "Button.h"
 
+// TODO: Implement Box2D!
+
 namespace rgl
 {
 	// Game
@@ -568,10 +570,10 @@ namespace rgl
 
 	void GameStateMachine::update()
 	{
+		pollTransitions();
+
 		if (!m_gameStates.empty())
 			m_gameStates.back()->update();
-
-		pollTransitions();
 	}
 
 	void GameStateMachine::render()
@@ -628,6 +630,7 @@ namespace rgl
 					if (pObjectLayer)
 					{
 						std::vector<std::shared_ptr<GameObject>>& gameObjects = pObjectLayer->getGameObjects();
+						std::get<1>(operation)->onDestroy();
 						gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), std::get<1>(operation)), gameObjects.end());
 					}
 				}
@@ -803,7 +806,7 @@ namespace rgl
 	void ObjectLayer::clean()
 	{
 		for (auto object : m_gameObjects)
-			object->clean();
+			object->onDestroy();
 
 		m_gameObjects.clear();
 	}
@@ -1114,11 +1117,6 @@ namespace rgl
 	void Button::draw()
 	{
 		GameActor::draw();
-	}
-
-	void Button::clean()
-	{
-		GameActor::clean();
 	}
 
 	void Button::setCallback(std::function<void()> callback)
