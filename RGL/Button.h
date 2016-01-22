@@ -3,12 +3,6 @@
 #include "GameActor.h"
 #include "ObjectFactory.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_BUTTON_API __declspec(dllexport)
-#else
-#define RGL_BUTTON_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class Button : public GameActor
@@ -29,16 +23,13 @@ namespace rgl
 
 	public:
 
-		RGL_BUTTON_API Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID);
+		RGL_API Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID);
 
-		virtual RGL_BUTTON_API void onCreate();
-		virtual RGL_BUTTON_API void onDestroy();
+		virtual RGL_API void onCreate();
+		virtual RGL_API void onDestroy();
 
-		virtual RGL_BUTTON_API void update();
-		virtual RGL_BUTTON_API void draw();
-
-		RGL_BUTTON_API void setCallback(std::function<void()> callback);
-		RGL_BUTTON_API int getCallbackID();
+		virtual RGL_API void update();
+		virtual RGL_API void draw();
 	};
 
 	class ButtonCreator : public ObjectCreator

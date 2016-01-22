@@ -4,12 +4,6 @@
 #include "ObjectParams.h"
 #include "Vector2.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_GAMEOBJECT_API __declspec(dllexport)
-#else
-#define RGL_GAMEOBJECT_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class Level;
@@ -20,7 +14,7 @@ namespace rgl
 
 		std::shared_ptr<Level> m_pLevel;
 
-		RGL_GAMEOBJECT_API GameObject(std::shared_ptr<Level> pParentLevel);
+		RGL_API GameObject(std::shared_ptr<Level> pParentLevel);
 
 	public:
 

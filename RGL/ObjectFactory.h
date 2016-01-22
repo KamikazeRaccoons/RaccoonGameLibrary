@@ -4,12 +4,6 @@
 #include "ObjectParams.h"
 #include "GameObject.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_OBJECTFACTORY_API __declspec(dllexport)
-#else
-#define RGL_OBJECTFACTORY_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class ObjectCreator
@@ -34,10 +28,10 @@ namespace rgl
 
 	public:
 
-		static RGL_OBJECTFACTORY_API ObjectFactory* get();
+		static RGL_API ObjectFactory* get();
 
-		RGL_OBJECTFACTORY_API bool registerType(std::string typeID, std::shared_ptr<ObjectCreator> pCreator);
-		RGL_OBJECTFACTORY_API std::shared_ptr<GameObject> create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams);
+		RGL_API bool registerType(std::string typeID, std::shared_ptr<ObjectCreator> pCreator);
+		RGL_API std::shared_ptr<GameObject> create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams);
 
 	};
 }

@@ -3,12 +3,6 @@
 #include "stdafx.h"
 #include "Vector2.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_INPUTHANDLER_API __declspec(dllexport)
-#else
-#define RGL_INPUTHANDLER_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class InputHandler
@@ -23,12 +17,12 @@ namespace rgl
 
 		const Uint8* m_pKeystates;
 
-		RGL_INPUTHANDLER_API InputHandler();
+		RGL_API InputHandler();
 		~InputHandler() { }
 
-		RGL_INPUTHANDLER_API void onMouseButtonDown(SDL_Event& event);
-		RGL_INPUTHANDLER_API void onMouseButtonUp(SDL_Event& event);
-		RGL_INPUTHANDLER_API void onMouseMove(SDL_Event& event);
+		RGL_API void onMouseButtonDown(SDL_Event& event);
+		RGL_API void onMouseButtonUp(SDL_Event& event);
+		RGL_API void onMouseMove(SDL_Event& event);
 
 	public:
 
@@ -39,14 +33,14 @@ namespace rgl
 			RIGHT = 2
 		};
 
-		static RGL_INPUTHANDLER_API InputHandler* get();
+		static RGL_API InputHandler* get();
 
-		RGL_INPUTHANDLER_API bool getMouseButtonState(int buttonID);
-		RGL_INPUTHANDLER_API std::shared_ptr<Vector2> getMousePosition();
+		RGL_API bool getMouseButtonState(int buttonID);
+		RGL_API std::shared_ptr<Vector2> getMousePosition();
 
-		RGL_INPUTHANDLER_API bool isKeyDown(SDL_Scancode key);
+		RGL_API bool isKeyDown(SDL_Scancode key);
 
-		RGL_INPUTHANDLER_API void update();
+		RGL_API void update();
 
 	};
 }

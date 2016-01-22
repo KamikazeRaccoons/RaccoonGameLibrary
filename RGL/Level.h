@@ -4,12 +4,6 @@
 #include "Layer.h"
 #include "ObjectParams.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_LEVEL_API __declspec(dllexport)
-#else
-#define RGL_LEVEL_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class GameObject;
@@ -43,28 +37,28 @@ namespace rgl
 		std::vector<std::function<void()>> m_callbacks;
 		std::vector<std::tuple<OperationType, std::shared_ptr<GameObject>, int>> m_queuedOperations;
 
-		RGL_LEVEL_API void pollOperations();
+		RGL_API void pollOperations();
 
 	public:
 
 		Level() { }
 		~Level() { }
 
-		RGL_LEVEL_API void update();
-		RGL_LEVEL_API void render();
-		RGL_LEVEL_API void clean();
+		RGL_API void update();
+		RGL_API void render();
+		RGL_API void clean();
 
-		RGL_LEVEL_API void addCallback(std::function<void()> callback);
-		RGL_LEVEL_API std::function<void()> getCallback(int callbackID);
+		RGL_API void addCallback(std::function<void()> callback);
+		RGL_API std::function<void()> getCallback(int callbackID);
 
-		RGL_LEVEL_API void addLayer(std::shared_ptr<Layer> pLayer);
+		RGL_API void addLayer(std::shared_ptr<Layer> pLayer);
 
-		RGL_LEVEL_API void addTexture(std::string file, std::string textureID);
+		RGL_API void addTexture(std::string file, std::string textureID);
 
-		RGL_LEVEL_API void addObject(std::shared_ptr<GameObject> pObject, int objectLayer = -1);
-		RGL_LEVEL_API void removeObject(std::shared_ptr<GameObject> pObject);
+		RGL_API void addObject(std::shared_ptr<GameObject> pObject, int objectLayer = -1);
+		RGL_API void removeObject(std::shared_ptr<GameObject> pObject);
 
-		RGL_LEVEL_API std::vector<Tileset>& getTilesets();
+		RGL_API std::vector<Tileset>& getTilesets();
 
 	};
 }

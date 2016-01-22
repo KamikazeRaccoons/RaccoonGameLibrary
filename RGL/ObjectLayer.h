@@ -4,12 +4,6 @@
 #include "Layer.h"
 #include "GameObject.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_OBJECTLAYER_API __declspec(dllexport)
-#else
-#define RGL_OBJECTLAYER_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class ObjectLayer : public Layer
@@ -20,11 +14,11 @@ namespace rgl
 
 	public:
 
-		virtual RGL_OBJECTLAYER_API void update();
-		virtual RGL_OBJECTLAYER_API void render();
-		virtual RGL_OBJECTLAYER_API void clean();
+		virtual RGL_API void update();
+		virtual RGL_API void render();
+		virtual RGL_API void clean();
 
-		RGL_OBJECTLAYER_API std::vector<std::shared_ptr<GameObject>>& getGameObjects();
+		RGL_API std::vector<std::shared_ptr<GameObject>>& getGameObjects();
 
 	};
 }

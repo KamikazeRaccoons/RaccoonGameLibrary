@@ -37,3 +37,10 @@
 
 // Box2D Header Files:
 #include <Box2D\Box2D.h>
+
+// Defines for DLL export/import:
+#ifdef RGL_EXPORTS
+#define RGL_API __declspec(dllexport)
+#else
+#define RGL_API __declspec(dllimport)
+#endif

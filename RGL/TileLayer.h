@@ -5,12 +5,6 @@
 #include "Level.h"
 #include "Vector2.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_TILELAYER_API __declspec(dllexport)
-#else
-#define RGL_TILELAYER_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class TileLayer : public Layer
@@ -30,16 +24,16 @@ namespace rgl
 
 	public:
 
-		RGL_TILELAYER_API TileLayer(int tileSize, const std::vector<Tileset>& tilesets);
+		RGL_API TileLayer(int tileSize, const std::vector<Tileset>& tilesets);
 
-		virtual RGL_TILELAYER_API void update();
-		virtual RGL_TILELAYER_API void render();
+		virtual RGL_API void update();
+		virtual RGL_API void render();
 		virtual void clean() { }
 
-		RGL_TILELAYER_API void setTileIDs(const std::vector<std::vector<int>>& data);
-		RGL_TILELAYER_API void setTileSize(int tileSize);
+		RGL_API void setTileIDs(const std::vector<std::vector<int>>& data);
+		RGL_API void setTileSize(int tileSize);
 
-		RGL_TILELAYER_API Tileset getTilesetByID(int tileID);
+		RGL_API Tileset getTilesetByID(int tileID);
 
 	};
 }

@@ -5,12 +5,6 @@
 #include "GameObject.h"
 #include "Vector2.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_GAMEACTOR_API __declspec(dllexport)
-#else
-#define RGL_GAMEACTOR_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class GameActor : public GameObject
@@ -33,18 +27,18 @@ namespace rgl
 
 	public:
 
-		RGL_GAMEACTOR_API GameActor(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int numFrames);
+		RGL_API GameActor(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int numFrames);
 		virtual ~GameActor() { }
 
 		virtual void onCreate() { }
 		virtual void onDestroy() { }
 
-		virtual RGL_GAMEACTOR_API void update();
-		virtual RGL_GAMEACTOR_API void draw();
+		virtual RGL_API void update();
+		virtual RGL_API void draw();
 
-		RGL_GAMEACTOR_API Vector2& getPosition();
-		RGL_GAMEACTOR_API int getWidth();
-		RGL_GAMEACTOR_API int getHeight();
+		RGL_API Vector2& getPosition();
+		RGL_API int getWidth();
+		RGL_API int getHeight();
 
 	};
 }

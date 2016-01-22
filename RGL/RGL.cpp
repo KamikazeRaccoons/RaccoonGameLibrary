@@ -352,7 +352,7 @@ namespace rgl
 
 			if (pMusic == 0)
 			{
-				Debugger::log("Could not load music from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::ERROR);
+				Debugger::log("Could not load music from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
 				return false;
 			}
 
@@ -364,7 +364,7 @@ namespace rgl
 
 			if (pChunk == 0)
 			{
-				Debugger::log("Could not load SFX from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::ERROR);
+				Debugger::log("Could not load SFX from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
 				return false;
 			}
 
@@ -417,7 +417,7 @@ namespace rgl
 		case Debugger::LogType::WARNING:
 			textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Yellow
 			break;
-		case Debugger::LogType::ERROR:
+		case Debugger::LogType::FATAL_ERROR:
 			textColor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Red
 			break;
 		}
@@ -687,7 +687,7 @@ namespace rgl
 		if (TextureManager::get()->load(file, textureID))
 			m_textureIDs.push_back(textureID);
 		else
-			Debugger::log("Could not load texture \"" + file + "\".", Debugger::ERROR);
+			Debugger::log("Could not load texture \"" + file + "\".", Debugger::WARNING);
 	}
 
 	void Level::addObject(std::shared_ptr<GameObject> pObject, int objectLayer)
@@ -848,7 +848,7 @@ namespace rgl
 
 		if (!pDataElement)
 		{
-			Debugger::log("Could not find \"data\" element.", Debugger::ERROR);
+			Debugger::log("Could not find \"data\" element.", Debugger::WARNING);
 			return;
 		}
 
@@ -893,7 +893,7 @@ namespace rgl
 
 				if (typeAttribute == 0)
 				{
-					Debugger::log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::ERROR);
+					Debugger::log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::WARNING);
 					continue;
 				}
 
@@ -999,10 +999,10 @@ namespace rgl
 
 		if (it == m_creators.end())
 		{
-			Debugger::log("Type \"" + typeID + "\" has not been registered.", Debugger::ERROR);
+			Debugger::log("Type \"" + typeID + "\" has not been registered.", Debugger::WARNING);
 			return 0;
 		}
-
+		
 		return it->second->createObject(pParentLevel, pObjectParams);
 	}
 
@@ -1117,15 +1117,5 @@ namespace rgl
 	void Button::draw()
 	{
 		GameActor::draw();
-	}
-
-	void Button::setCallback(std::function<void()> callback)
-	{
-		m_callback = callback;
-	}
-
-	int Button::getCallbackID()
-	{
-		return m_callbackID;
 	}
 }

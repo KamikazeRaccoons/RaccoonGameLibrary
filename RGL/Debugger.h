@@ -2,14 +2,6 @@
 
 #include "stdafx.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_DEBUGGER_API __declspec(dllexport)
-#else
-#define RGL_DEBUGGER_API __declspec(dllimport)
-#endif
-
-#undef ERROR
-
 namespace rgl
 {
 	struct Debugger
@@ -18,10 +10,10 @@ namespace rgl
 		{
 			MESSAGE = 0,
 			WARNING = 1,
-			ERROR = 2
+			FATAL_ERROR = 2
 		};
 
-		static RGL_DEBUGGER_API void log(std::string message, LogType logType = MESSAGE);
+		static RGL_API void log(std::string message, LogType logType = MESSAGE);
 
 	};
 }

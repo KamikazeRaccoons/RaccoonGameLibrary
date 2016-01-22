@@ -4,12 +4,6 @@
 #include "GameState.h"
 #include "GameStateMachine.h"
 
-#ifdef RGL_EXPORTS
-#define RGL_GAME_API __declspec(dllexport)
-#else
-#define RGL_GAME_API __declspec(dllimport)
-#endif
-
 namespace rgl
 {
 	class Game
@@ -33,30 +27,30 @@ namespace rgl
 		Game() : m_running(false) { }
 		~Game() { }
 
-		RGL_GAME_API void pollEvents();
-		RGL_GAME_API void update();
-		RGL_GAME_API void render();
-		RGL_GAME_API void clean();
+		RGL_API void pollEvents();
+		RGL_API void update();
+		RGL_API void render();
+		RGL_API void clean();
 
 	public:
 
-		static RGL_GAME_API Game* get();
+		static RGL_API Game* get();
 
-		RGL_GAME_API void setFrameRate(double frameRate);
-		RGL_GAME_API double getDeltaTime() const;
+		RGL_API void setFrameRate(double frameRate);
+		RGL_API double getDeltaTime() const;
 
-		RGL_GAME_API SDL_Window* getWindow();
-		RGL_GAME_API SDL_Renderer* getRenderer();
+		RGL_API SDL_Window* getWindow();
+		RGL_API SDL_Renderer* getRenderer();
 
-		RGL_GAME_API int getWidth() const;
-		RGL_GAME_API int getHeight() const;
+		RGL_API int getWidth() const;
+		RGL_API int getHeight() const;
 
-		RGL_GAME_API std::shared_ptr<GameStateMachine> getGameStateMachine();
+		RGL_API std::shared_ptr<GameStateMachine> getGameStateMachine();
 
-		RGL_GAME_API bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool fullscreen = false,
+		RGL_API bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool fullscreen = false,
 			double frameRate = 60.0);
 
-		RGL_GAME_API void quit();
+		RGL_API void quit();
 
 	};
 

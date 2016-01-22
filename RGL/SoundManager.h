@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef RGL_EXPORTS
-#define RGL_SOUNDMANAGER_API __declspec(dllexport)
-#else
-#define RGL_SOUNDMANAGER_API __declspec(dllimport)
-#endif
+#include "stdafx.h"
 
 namespace rgl
 {
@@ -28,14 +24,14 @@ namespace rgl
 			SFX = 1
 		};
 
-		static RGL_SOUNDMANAGER_API SoundManager* get();
+		static RGL_API SoundManager* get();
 
-		RGL_SOUNDMANAGER_API void init();
-		RGL_SOUNDMANAGER_API bool load(std::string filename, std::string id, SoundType soundType);
-		RGL_SOUNDMANAGER_API void clean();
+		RGL_API void init();
+		RGL_API bool load(std::string filename, std::string id, SoundType soundType);
+		RGL_API void clean();
 
-		RGL_SOUNDMANAGER_API void playSound(std::string id, int loops);
-		RGL_SOUNDMANAGER_API void playMusic(std::string id, int loops);
+		RGL_API void playSound(std::string id, int loops);
+		RGL_API void playMusic(std::string id, int loops);
 
 	};
 }

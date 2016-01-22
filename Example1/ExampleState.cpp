@@ -7,7 +7,7 @@ void ExampleState::update()
 
 void ExampleState::render()
 {
-	SDL_SetRenderDrawColor(rgl::Game::get()->getRenderer(), 127, 127, 127, 255);
+	SDL_SetRenderDrawColor(rgl::Game::get()->getRenderer(), 0, 191, 255, 255);
 	SDL_RenderClear(rgl::Game::get()->getRenderer());
 
 	m_pLevel->render();
