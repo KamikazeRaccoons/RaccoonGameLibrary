@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Level.h"
 
 namespace rgl
 {
@@ -8,6 +9,9 @@ namespace rgl
 	{
 	protected:
 
+		std::shared_ptr<Level> m_pLevel;
+
+		Layer(std::shared_ptr<Level> pLevel) : m_pLevel(pLevel) { }
 		virtual ~Layer() { }
 
 	public:

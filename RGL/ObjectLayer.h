@@ -14,6 +14,8 @@ namespace rgl
 
 	public:
 
+		ObjectLayer(std::shared_ptr<Level> pLevel) : Layer(pLevel) { }
+
 		virtual RGL_API void update();
 		virtual RGL_API void render();
 		virtual RGL_API void clean();

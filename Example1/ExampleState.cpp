@@ -21,6 +21,8 @@ void ExampleState::onEnter()
 	m_pLevel->addCallback(quitState);
 	m_pLevel->addCallback(playShoot);
 
+	m_pLevel->getVelocity().setX(1);
+
 	rgl::SoundManager::get()->load("assets/sounds/Gunshot.wav", "Gunshot", rgl::SoundManager::SFX);
 }
 

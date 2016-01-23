@@ -92,7 +92,6 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameActor.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GameStateMachine.h" />

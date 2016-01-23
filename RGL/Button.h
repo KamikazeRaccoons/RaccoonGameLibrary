@@ -1,11 +1,11 @@
 #pragma once
 
-#include "GameActor.h"
+#include "GameObject.h"
 #include "ObjectFactory.h"
 
 namespace rgl
 {
-	class Button : public GameActor
+	class Button : public GameObject
 	{
 	private:
 
@@ -14,29 +14,42 @@ namespace rgl
 			MOUSE_AWAY = 0,
 			MOUSE_HOVERING = 1,
 			MOUSE_PRESSED = 2
-		};
+		} m_buttonState;
 
 		bool m_pressed;
 
-		std::function<void()> m_callback;
+		Vector2 m_position;
+
+		int m_width;
+		int m_height;
+
+		std::string m_textureID;
+
 		int m_callbackID;
+		std::function<void()> m_callback;
 
 	public:
 
-		RGL_API Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID);
+		Button(int x, int y, int width, int height, std::string textureID, int callbackID)
+			: m_buttonState(MOUSE_AWAY), m_pressed(false), m_position(x, y), m_width(width), m_height(height),
+			m_textureID(textureID), m_callbackID(callbackID) { }
 
 		virtual RGL_API void onCreate();
-		virtual RGL_API void onDestroy();
+		virtual void onDestroy() { }
 
 		virtual RGL_API void update();
 		virtual RGL_API void draw();
+
+		RGL_API Vector2& getPosition();
+		RGL_API int getWidth();
+		RGL_API int getHeight();
 	};
 
 	class ButtonCreator : public ObjectCreator
 	{
-		std::shared_ptr<GameObject> createObject(std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams) const
+		std::shared_ptr<GameObject> createObject(const std::shared_ptr<ObjectParams> pObjectParams) const
 		{
-			return std::make_shared<Button>(pParentLevel, pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"),
+			return std::make_shared<Button>(pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"),
 				pObjectParams->getIntParam("width"), pObjectParams->getIntParam("height"), pObjectParams->getStringParam("textureID"),
 				pObjectParams->getIntParam("callbackID"));
 		}

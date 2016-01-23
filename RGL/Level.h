@@ -21,7 +21,7 @@ namespace rgl
 		std::string name;
 	};
 	
-	class Level
+	class Level : public std::enable_shared_from_this<Level>
 	{
 	private:
 
@@ -37,11 +37,14 @@ namespace rgl
 		std::vector<std::function<void()>> m_callbacks;
 		std::vector<std::tuple<OperationType, std::shared_ptr<GameObject>, int>> m_queuedOperations;
 
+		Vector2 m_position;
+		Vector2 m_velocity;
+
 		RGL_API void pollOperations();
 
 	public:
 
-		Level() { }
+		Level() : m_position(0, 0), m_velocity(0, 0) { }
 		~Level() { }
 
 		RGL_API void update();
@@ -58,7 +61,12 @@ namespace rgl
 		RGL_API void addObject(std::shared_ptr<GameObject> pObject, int objectLayer = -1);
 		RGL_API void removeObject(std::shared_ptr<GameObject> pObject);
 
+		RGL_API Tileset getTilesetByID(int tileID);
+
 		RGL_API std::vector<Tileset>& getTilesets();
+
+		RGL_API Vector2& getPosition();
+		RGL_API Vector2& getVelocity();
 
 	};
 }

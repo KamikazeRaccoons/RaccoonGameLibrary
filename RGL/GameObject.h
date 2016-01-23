@@ -14,8 +14,6 @@ namespace rgl
 
 		std::shared_ptr<Level> m_pLevel;
 
-		RGL_API GameObject(std::shared_ptr<Level> pParentLevel);
-
 	public:
 
 		virtual void onCreate() = 0;
@@ -23,6 +21,8 @@ namespace rgl
 
 		virtual void update() = 0;
 		virtual void draw() = 0;
+
+		RGL_API void setParentLevel(std::shared_ptr<Level> pParentLevel);
 
 	};
 }

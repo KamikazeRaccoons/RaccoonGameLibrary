@@ -16,7 +16,6 @@
 #include "ObjectParams.h"
 #include "ObjectFactory.h"
 #include "GameObject.h"
-#include "GameActor.h"
 #include "Button.h"
 
 // TODO: Implement Box2D!
@@ -643,6 +642,8 @@ namespace rgl
 
 	void Level::update()
 	{
+		m_position += m_velocity;
+
 		for (auto layer : m_layers)
 			layer->update();
 
@@ -692,6 +693,7 @@ namespace rgl
 
 	void Level::addObject(std::shared_ptr<GameObject> pObject, int objectLayer)
 	{
+		pObject->setParentLevel(shared_from_this());
 		m_queuedOperations.push_back(std::make_tuple(ADD, pObject, objectLayer));
 	}
 
@@ -700,42 +702,67 @@ namespace rgl
 		m_queuedOperations.push_back(std::make_tuple(REMOVE, pObject, 0));
 	}
 
+	Tileset Level::getTilesetByID(int tileID)
+	{
+		for (unsigned int i = 0; i < m_tilesets.size(); i++)
+		{
+			if (i + 1 <= m_tilesets.size() - 1)
+			{
+				if (tileID >=m_tilesets[i].firstGridID && tileID < m_tilesets[i + 1].firstGridID)
+					return m_tilesets[i];
+			}
+			else
+			{
+				return m_tilesets[i];
+			}
+		}
+
+		Debugger::log("Could not find tileset with ID " + std::to_string(tileID) + ". Returning empty tileset.");
+
+		return Tileset();
+	}
+
 	std::vector<Tileset>& Level::getTilesets()
 	{
 		return m_tilesets;
 	}
 
-	// TileLayer
-
-	TileLayer::TileLayer(int tileSize, const std::vector<Tileset>& tilesets)
-		: m_tileSize(tileSize), m_tilesets(tilesets), m_position(0, 0), m_velocity(0, 0)
+	Vector2& Level::getPosition()
 	{
-		m_numColumns = Game::get()->getWidth() / m_tileSize;
-		m_numRows = Game::get()->getHeight() / m_tileSize;
+		return m_position;
 	}
 
-	void TileLayer::update()
+	Vector2& Level::getVelocity()
 	{
-		m_position += m_velocity;
+		return m_velocity;
+	}
+
+	// TileLayer
+
+	TileLayer::TileLayer(std::shared_ptr<Level> pLevel, int tileSize)
+		: Layer(pLevel), m_tileSize(tileSize)
+	{
+		m_numColumns = (int)std::ceil((float)Game::get()->getWidth() / (float)m_tileSize) + 1;
+		m_numRows = (int)std::ceil((float)Game::get()->getHeight() / (float)m_tileSize) + 1;
 	}
 
 	void TileLayer::render()
 	{
 		int x, y, x2, y2;
 
-		x = (int)(m_position.getX() / m_tileSize);
-		y = (int)(m_position.getY() / m_tileSize);
+		x = (int)(m_pLevel->getPosition().getX() / m_tileSize);
+		y = (int)(m_pLevel->getPosition().getY() / m_tileSize);
 
-		x2 = (int)m_position.getX() % m_tileSize;
-		y2 = (int)m_position.getY() % m_tileSize;
+		x2 = (int)m_pLevel->getPosition().getX() % m_tileSize;
+		y2 = (int)m_pLevel->getPosition().getY() % m_tileSize;
 
-		for (int i = 0; i < (y2 > 0 ? m_numRows + 1 : m_numRows); i++)
+		for (int i = 0; i < m_numRows; i++)
 		{
-			for (int j = 0; j < (x2 > 0 ? m_numColumns + 1 : m_numColumns); j++)
+			for (int j = 0; j < m_numColumns; j++)
 			{
 				int id;
 
-				if (i + y < (int)m_tileIDs.size() && j + x < (int)m_tileIDs[i + y].size())
+				if (i + y >= 0 && i + y < (int)m_tileIDs.size() && j + x >= 0 && j + x < (int)m_tileIDs[i + y].size())
 					id = m_tileIDs[i + y][j + x];
 				else
 					id = 0;
@@ -743,7 +770,7 @@ namespace rgl
 				if (id == 0)
 					continue;
 
-				Tileset tileset = getTilesetByID(id);
+				Tileset tileset = m_pLevel->getTilesetByID(id);
 
 				id--;
 
@@ -762,26 +789,6 @@ namespace rgl
 	void TileLayer::setTileSize(int tileSize)
 	{
 		m_tileSize = tileSize;
-	}
-
-	Tileset TileLayer::getTilesetByID(int tileID)
-	{
-		for (unsigned int i = 0; i < m_tilesets.size(); i++)
-		{
-			if (i + 1 <= m_tilesets.size() - 1)
-			{
-				if (tileID >= m_tilesets[i].firstGridID && tileID < m_tilesets[i + 1].firstGridID)
-					return m_tilesets[i];
-			}
-			else
-			{
-				return m_tilesets[i];
-			}
-		}
-
-		Debugger::log("Could not find tileset with ID " + std::to_string(tileID) + ". Returning empty tileset.");
-
-		return Tileset();
 	}
 
 	// ObjectLayer
@@ -833,7 +840,7 @@ namespace rgl
 
 	void LevelParser::parseTileLayer(tinyxml2::XMLElement* pTileElement, std::shared_ptr<Level> pLevel)
 	{
-		std::shared_ptr<TileLayer> pTileLayer = std::make_shared<TileLayer>(m_tileSize, pLevel->getTilesets());
+		std::shared_ptr<TileLayer> pTileLayer = std::make_shared<TileLayer>(pLevel, m_tileSize);
 
 		std::vector<std::vector<int>> data;
 
@@ -883,7 +890,7 @@ namespace rgl
 
 	void LevelParser::parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::shared_ptr<Level> pLevel)
 	{
-		pLevel->addLayer(std::make_shared<ObjectLayer>());
+		pLevel->addLayer(std::make_shared<ObjectLayer>(pLevel));
 
 		for (tinyxml2::XMLElement* e = pObjectGroupRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
@@ -914,7 +921,7 @@ namespace rgl
 					}
 				}
 
-				pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pLevel, pParams));
+				pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pParams));
 			}
 		}
 	}
@@ -993,7 +1000,7 @@ namespace rgl
 		return true;
 	}
 
-	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams)
+	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID, const std::shared_ptr<ObjectParams> pObjectParams)
 	{
 		std::map<std::string, std::shared_ptr<ObjectCreator>>::iterator it = m_creators.find(typeID);
 
@@ -1003,82 +1010,22 @@ namespace rgl
 			return 0;
 		}
 		
-		return it->second->createObject(pParentLevel, pObjectParams);
+		return it->second->createObject(pObjectParams);
 	}
 
 	// GameObject
 
-	GameObject::GameObject(std::shared_ptr<Level> pParentLevel)
+	void GameObject::setParentLevel(std::shared_ptr<Level> pParentLevel)
 	{
-		m_pLevel = pParentLevel;
-	}
-
-	// GameActor
-
-	GameActor::GameActor(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int numFrames)
-		: GameObject(pParentLevel)
-	{
-		m_position = Vector2(x, y);
-
-		m_velocity = Vector2(0, 0);
-		m_acceleration = Vector2(0, 0);
-
-		m_width = width;
-		m_height = height;
-
-		m_textureID = textureID;
-
-		m_currentRow = 0;
-		m_currentFrame = 0;
-
-		m_numFrames = numFrames;
-	}
-
-	void GameActor::update()
-	{
-		m_velocity += m_acceleration;
-		m_position += m_velocity;
-	}
-
-	void GameActor::draw()
-	{
-		TextureManager::get()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(),
-			m_width, m_height, m_currentRow, m_currentFrame);
-	}
-
-	Vector2& GameActor::getPosition()
-	{
-		return m_position;
-	}
-
-	int GameActor::getWidth()
-	{
-		return m_width;
-	}
-
-	int GameActor::getHeight()
-	{
-		return m_height;
+		if (!m_pLevel)
+			m_pLevel = pParentLevel;
 	}
 
 	// Button
 
-	Button::Button(std::shared_ptr<Level> pParentLevel, int x, int y, int width, int height, std::string textureID, int callbackID)
-		: GameActor(pParentLevel, x, y, width, height, textureID, 3)
-	{
-		m_callbackID = callbackID;
-		m_currentFrame = MOUSE_AWAY;
-	}
-
 	void Button::onCreate()
 	{
-		GameActor::onCreate();
 		m_callback = m_pLevel->getCallback(m_callbackID);
-	}
-
-	void Button::onDestroy()
-	{
-		GameActor::onDestroy();
 	}
 
 	void Button::update()
@@ -1094,7 +1041,7 @@ namespace rgl
 			{
 				if (!m_pressed)
 				{
-					m_currentFrame = MOUSE_PRESSED;
+					m_buttonState = MOUSE_PRESSED;
 
 					if (m_callback)
 						m_callback();
@@ -1105,17 +1052,32 @@ namespace rgl
 			else
 			{
 				m_pressed = false;
-				m_currentFrame = MOUSE_HOVERING;
+				m_buttonState = MOUSE_HOVERING;
 			}
 		}
 		else
 		{
-			m_currentFrame = MOUSE_AWAY;
+			m_buttonState = MOUSE_AWAY;
 		}
 	}
 	
 	void Button::draw()
 	{
-		GameActor::draw();
+		TextureManager::get()->drawFrame(m_textureID, (int)m_position.getX(), (int)m_position.getY(), m_width, m_height, 0, m_buttonState);
+	}
+
+	Vector2& Button::getPosition()
+	{
+		return m_position;
+	}
+
+	int Button::getWidth()
+	{
+		return m_width;
+	}
+
+	int Button::getHeight()
+	{
+		return m_height;
 	}
 }

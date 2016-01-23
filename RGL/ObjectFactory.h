@@ -10,7 +10,7 @@ namespace rgl
 	{
 	public:
 
-		virtual std::shared_ptr<GameObject> createObject(std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams) const = 0;
+		virtual std::shared_ptr<GameObject> createObject(const std::shared_ptr<ObjectParams> pObjectParams) const = 0;
 		virtual ~ObjectCreator() { }
 
 	};
@@ -31,7 +31,7 @@ namespace rgl
 		static RGL_API ObjectFactory* get();
 
 		RGL_API bool registerType(std::string typeID, std::shared_ptr<ObjectCreator> pCreator);
-		RGL_API std::shared_ptr<GameObject> create(std::string typeID, std::shared_ptr<Level> pParentLevel, const std::shared_ptr<ObjectParams> pObjectParams);
+		RGL_API std::shared_ptr<GameObject> create(std::string typeID, const std::shared_ptr<ObjectParams> pObjectParams);
 
 	};
 }
