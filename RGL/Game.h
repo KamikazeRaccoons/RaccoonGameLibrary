@@ -15,6 +15,7 @@ namespace rgl
 		SDL_Window* m_pWindow;
 		SDL_Renderer* m_pRenderer;
 
+		bool m_useDebugging;
 		bool m_running;
 
 		double m_deltaTime;
@@ -41,6 +42,8 @@ namespace rgl
 
 		RGL_API SDL_Window* getWindow();
 		RGL_API SDL_Renderer* getRenderer();
+
+		RGL_API bool isDebugEnabled() const;
 
 		RGL_API int getWidth() const;
 		RGL_API int getHeight() const;

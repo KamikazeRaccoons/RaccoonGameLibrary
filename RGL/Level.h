@@ -31,6 +31,10 @@ namespace rgl
 			REMOVE = 1
 		};
 
+		const int m_tileSize;
+		const int m_width;
+		const int m_height;
+
 		std::vector<Tileset> m_tilesets;
 		std::vector<std::shared_ptr<Layer>> m_layers;
 		std::vector<std::string> m_textureIDs;
@@ -40,19 +44,23 @@ namespace rgl
 		Vector2 m_position;
 		Vector2 m_velocity;
 
-		b2Vec2 m_gravity;
 		b2World m_world;
 
 		RGL_API void pollOperations();
 
 	public:
 
-		Level() : m_position(0, 0), m_velocity(0, 0), m_gravity(0, -9.81f), m_world(m_gravity) { }
+		Level(int tileSize, int width, int height) : m_tileSize(tileSize), m_width(width), m_height(height),
+			m_position(0, 0), m_velocity(0, 0), m_world(b2Vec2(0.0f, 9.81f)) { }
 		~Level() { }
 
 		RGL_API void update();
 		RGL_API void render();
 		RGL_API void clean();
+
+		RGL_API int getTileSize() const;
+		RGL_API int getWidth() const;
+		RGL_API int getHeight() const;
 
 		RGL_API void addCallback(std::function<void()> callback);
 		RGL_API std::function<void()> getCallback(int callbackID);
@@ -71,7 +79,7 @@ namespace rgl
 		RGL_API Vector2& getPosition();
 		RGL_API Vector2& getVelocity();
 
-		RGL_API b2Vec2& getGravity();
+		RGL_API b2World& getWorld();
 
 	};
 }

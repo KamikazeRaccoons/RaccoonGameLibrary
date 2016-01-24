@@ -102,6 +102,7 @@
     <ClInclude Include="ObjectFactory.h" />
     <ClInclude Include="ObjectLayer.h" />
     <ClInclude Include="ObjectParams.h" />
+    <ClInclude Include="PhysicsObject.h" />
     <ClInclude Include="RGL.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="TextureManager.h" />

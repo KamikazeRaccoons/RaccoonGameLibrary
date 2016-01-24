@@ -19,7 +19,7 @@ namespace rgl
 
 	public:
 
-		RGL_API TileLayer(std::shared_ptr<Level> pLevel, int tileSize);
+		RGL_API TileLayer(std::shared_ptr<Level> pLevel);
 
 		virtual void update() { }
 		virtual RGL_API void render();

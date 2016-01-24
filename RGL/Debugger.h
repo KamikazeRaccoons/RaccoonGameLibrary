@@ -27,7 +27,7 @@ namespace rgl
 		
 		static RGL_API Debugger* get();
 
-		RGL_API void init();
+		RGL_API void init(std::string title);
 		RGL_API void log(std::string message, LogType logType = MESSAGE);
 
 	};
