@@ -69,8 +69,14 @@ namespace rgl
 		return m_height;
 	}
 
-	bool Game::run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool fullscreen, double frameRate)
+	bool Game::run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool useDebugging, bool fullscreen, double frameRate)
 	{
+		if (m_running)
+			return false;
+
+		if (useDebugging)
+			Debugger::get()->init();
+
 		if (pInitState == 0 ||
 			SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
 			(m_pWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
@@ -351,7 +357,7 @@ namespace rgl
 
 			if (pMusic == 0)
 			{
-				Debugger::log("Could not load music from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
+				Debugger::get()->log("Could not load music from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
 				return false;
 			}
 
@@ -363,7 +369,7 @@ namespace rgl
 
 			if (pChunk == 0)
 			{
-				Debugger::log("Could not load SFX from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
+				Debugger::get()->log("Could not load SFX from file \"" + fileName + "\".\n" + Mix_GetError(), Debugger::WARNING);
 				return false;
 			}
 
@@ -400,31 +406,57 @@ namespace rgl
 
 	// Debugger
 
+	Debugger* Debugger::m_pInstance = 0;
+
+	Debugger* Debugger::get()
+	{
+		if (m_pInstance == 0)
+			m_pInstance = new Debugger();
+
+		return m_pInstance;
+	}
+
+	void Debugger::init()
+	{
+		if (m_initialized)
+			return;
+
+		AllocConsole();
+		SetConsoleTitle(L"RGL Debugger");
+		m_hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+		m_initialized = true;
+	}
+
 	void Debugger::log(std::string message, Debugger::LogType logType)
 	{
-#ifdef _DEBUG
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-		GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-		WORD textColor;
+		if (!m_initialized)
+			return;
 
-		switch (logType)
+		if (m_lastLogType != logType)
 		{
-		case Debugger::LogType::MESSAGE:
-			textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // White
-			break;
-		case Debugger::LogType::WARNING:
-			textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Yellow
-			break;
-		case Debugger::LogType::FATAL_ERROR:
-			textColor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Red
-			break;
-		}
+			m_lastLogType = logType;
 
-		SetConsoleTextAttribute(hConsole, textColor);
-		std::cout << message << std::endl;
-		SetConsoleTextAttribute(hConsole, consoleInfo.wAttributes);
-#endif
+			WORD textColor;
+
+			switch (logType)
+			{
+			case Debugger::LogType::MESSAGE:
+				textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // White
+				break;
+			case Debugger::LogType::WARNING:
+				textColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Yellow
+				break;
+			case Debugger::LogType::FATAL_ERROR:
+				textColor = FOREGROUND_RED | FOREGROUND_INTENSITY; // Red
+				break;
+			}
+
+			SetConsoleTextAttribute(m_hConsole, textColor);
+		}
+		
+		std::wstring wMessage = std::wstring(message.begin(), message.end()) + L"\n";
+		WriteConsole(m_hConsole, wMessage.c_str(), wMessage.length(), NULL, NULL);
 	}
 
 	// Vector2
@@ -688,7 +720,7 @@ namespace rgl
 		if (TextureManager::get()->load(file, textureID))
 			m_textureIDs.push_back(textureID);
 		else
-			Debugger::log("Could not load texture \"" + file + "\".", Debugger::WARNING);
+			Debugger::get()->log("Could not load texture \"" + file + "\".", Debugger::WARNING);
 	}
 
 	void Level::addObject(std::shared_ptr<GameObject> pObject, int objectLayer)
@@ -717,7 +749,7 @@ namespace rgl
 			}
 		}
 
-		Debugger::log("Could not find tileset with ID " + std::to_string(tileID) + ". Returning empty tileset.");
+		Debugger::get()->log("Could not find tileset with ID " + std::to_string(tileID) + ". Returning empty tileset.");
 
 		return Tileset();
 	}
@@ -735,6 +767,11 @@ namespace rgl
 	Vector2& Level::getVelocity()
 	{
 		return m_velocity;
+	}
+
+	b2Vec2& Level::getGravity()
+	{
+		return m_gravity;
 	}
 
 	// TileLayer
@@ -855,7 +892,7 @@ namespace rgl
 
 		if (!pDataElement)
 		{
-			Debugger::log("Could not find \"data\" element.", Debugger::WARNING);
+			Debugger::get()->log("Could not find \"data\" element.", Debugger::WARNING);
 			return;
 		}
 
@@ -881,13 +918,21 @@ namespace rgl
 		pLevel->addLayer(pTileLayer);
 	}
 
-	void LevelParser::parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path)
+	void LevelParser::parseProperties(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path)
 	{
 		for (tinyxml2::XMLElement* e = pPropertiesRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
-			if (e->Value() == std::string("property"))				
-				pLevel->addTexture(path + e->Attribute("value"), e->Attribute("name"));
+		{
+			if (e->Value() == std::string("property"))
+			{
+				std::string nameAttribute = e->Attribute("name");
+				if (nameAttribute == "gravity")
+					pLevel->getGravity().Set(0.0f, e->FloatAttribute("value"));
+				else
+					pLevel->addTexture(path + e->Attribute("value"), e->Attribute("name"));
+			}
+		}
 	}
-
+	
 	void LevelParser::parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::shared_ptr<Level> pLevel)
 	{
 		pLevel->addLayer(std::make_shared<ObjectLayer>(pLevel));
@@ -900,7 +945,7 @@ namespace rgl
 
 				if (typeAttribute == 0)
 				{
-					Debugger::log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::WARNING);
+					Debugger::get()->log("Undefined type for object \"" + std::string(e->Attribute("name")) + "\".", Debugger::WARNING);
 					continue;
 				}
 
@@ -942,7 +987,7 @@ namespace rgl
 		for (tinyxml2::XMLElement* e = pRoot->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
 			if (e->Value() == std::string("properties"))
-				parseTextures(e, pLevel, path);
+				parseProperties(e, pLevel, path);
 			else if (e->Value() == std::string("tileset"))
 				parseTilesets(e, pLevel, path);
 			else if (e->Value() == std::string("layer"))
@@ -1006,7 +1051,7 @@ namespace rgl
 
 		if (it == m_creators.end())
 		{
-			Debugger::log("Type \"" + typeID + "\" has not been registered.", Debugger::WARNING);
+			Debugger::get()->log("Type \"" + typeID + "\" has not been registered.", Debugger::WARNING);
 			return 0;
 		}
 		

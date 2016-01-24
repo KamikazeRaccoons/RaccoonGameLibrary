@@ -16,7 +16,7 @@ namespace rgl
 
 		RGL_API void parseTilesets(tinyxml2::XMLElement* pTilesetRoot, std::shared_ptr<Level> pLevel, std::string path);
 		RGL_API void parseTileLayer(tinyxml2::XMLElement* pTileElement, std::shared_ptr<Level> pLevel);
-		RGL_API void parseTextures(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path);
+		RGL_API void parseProperties(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path);
 		RGL_API void parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::shared_ptr<Level> pLevel);
 
 	public:

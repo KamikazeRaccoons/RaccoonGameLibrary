@@ -40,11 +40,14 @@ namespace rgl
 		Vector2 m_position;
 		Vector2 m_velocity;
 
+		b2Vec2 m_gravity;
+		b2World m_world;
+
 		RGL_API void pollOperations();
 
 	public:
 
-		Level() : m_position(0, 0), m_velocity(0, 0) { }
+		Level() : m_position(0, 0), m_velocity(0, 0), m_gravity(0, -9.81f), m_world(m_gravity) { }
 		~Level() { }
 
 		RGL_API void update();
@@ -67,6 +70,8 @@ namespace rgl
 
 		RGL_API Vector2& getPosition();
 		RGL_API Vector2& getVelocity();
+
+		RGL_API b2Vec2& getGravity();
 
 	};
 }

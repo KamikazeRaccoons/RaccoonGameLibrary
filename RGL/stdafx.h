@@ -11,6 +11,8 @@
 
 // Windows Header Files:
 #include <windows.h>
+#include <io.h>
+#include <fcntl.h>
 
 // Standard Library Items:
 #include <memory>

@@ -41,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\RaccoonGameLibrary\Debug;$(LibraryPath);C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\zlib1.2.8-dll\lib;C:\Box2D-master\Box2D\Build\vs2013\bin\x32\Release</LibraryPath>
+    <LibraryPath>C:\RaccoonGameLibrary\Release;$(LibraryPath);C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\zlib1.2.8-dll\lib;C:\Box2D-master\Box2D\Build\vs2013\bin\x32\Release</LibraryPath>
     <IncludePath>C:\RaccoonGameLibrary\RGL;C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.1\include;C:\SDL2\SDL2_mixer-2.0.1\include;C:\zlib1.2.8-dll\include;C:\Box2D-master\Box2D;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -60,7 +60,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>RGL.lib;SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>

@@ -5,9 +5,9 @@
 
 int main(int argc, char** argv)
 {
-	if (!rgl::Game::get()->run("Example1", 640, 480, std::make_shared<ExampleState>()))
+	if (!rgl::Game::get()->run("Example1", 640, 480, std::make_shared<ExampleState>(), true))
 	{
-		rgl::Debugger::log("Could not initialize game.\n", rgl::Debugger::FATAL_ERROR);
+		rgl::Debugger::get()->log("Could not initialize game.\n", rgl::Debugger::FATAL_ERROR);
 		system("PAUSE");
 	}
 

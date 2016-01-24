@@ -47,8 +47,8 @@ namespace rgl
 
 		RGL_API std::shared_ptr<GameStateMachine> getGameStateMachine();
 
-		RGL_API bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool fullscreen = false,
-			double frameRate = 60.0);
+		RGL_API bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState,
+			bool useDebugging = false, bool fullscreen = false, double frameRate = 60.0);
 
 		RGL_API void quit();
 
