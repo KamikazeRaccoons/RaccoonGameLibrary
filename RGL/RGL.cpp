@@ -1039,19 +1039,13 @@ namespace rgl
 		{
 			if (InputHandler::get()->getMouseButtonState(InputHandler::LEFT))
 			{
-				if (!m_pressed)
-				{
-					m_buttonState = MOUSE_PRESSED;
-
-					if (m_callback)
-						m_callback();
-
-					m_pressed = true;
-				}
+				m_buttonState = MOUSE_PRESSED;
 			}
 			else
 			{
-				m_pressed = false;
+				if (m_buttonState == MOUSE_PRESSED)
+					m_callback();
+
 				m_buttonState = MOUSE_HOVERING;
 			}
 		}

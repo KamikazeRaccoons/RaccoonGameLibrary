@@ -16,8 +16,6 @@ namespace rgl
 			MOUSE_PRESSED = 2
 		} m_buttonState;
 
-		bool m_pressed;
-
 		Vector2 m_position;
 
 		int m_width;
@@ -31,7 +29,7 @@ namespace rgl
 	public:
 
 		Button(int x, int y, int width, int height, std::string textureID, int callbackID)
-			: m_buttonState(MOUSE_AWAY), m_pressed(false), m_position(x, y), m_width(width), m_height(height),
+			: m_buttonState(MOUSE_AWAY), m_position(x, y), m_width(width), m_height(height),
 			m_textureID(textureID), m_callbackID(callbackID) { }
 
 		virtual RGL_API void onCreate();
