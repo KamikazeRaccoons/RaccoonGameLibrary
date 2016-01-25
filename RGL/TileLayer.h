@@ -16,6 +16,7 @@ namespace rgl
 		int m_tileSize;
 
 		std::vector<std::vector<int>> m_tileIDs;
+		std::vector<b2Body*> m_pBodies;
 
 	public:
 
@@ -27,6 +28,7 @@ namespace rgl
 
 		RGL_API void setTileIDs(const std::vector<std::vector<int>>& data);
 		RGL_API void setTileSize(int tileSize);
+		RGL_API void generateBodies();
 
 	};
 }

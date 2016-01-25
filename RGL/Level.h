@@ -50,8 +50,7 @@ namespace rgl
 
 	public:
 
-		Level(int tileSize, int width, int height) : m_tileSize(tileSize), m_width(width), m_height(height),
-			m_position(0, 0), m_velocity(0, 0), m_world(b2Vec2(0.0f, 9.81f)) { }
+		RGL_API Level(int tileSize, int width, int height);
 		~Level() { }
 
 		RGL_API void update();

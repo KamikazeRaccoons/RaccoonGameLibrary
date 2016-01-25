@@ -7,6 +7,7 @@
 #include "TextureManager.h"
 #include "SoundManager.h"
 #include "Debugger.h"
+#include "DebugDraw.h"
 #include "Vector2.h"
 #include "GameStateMachine.h"
 #include "Level.h"
@@ -18,8 +19,6 @@
 #include "GameObject.h"
 #include "Button.h"
 #include "PhysicsObject.h"
-
-// TODO: Implement Box2D!
 
 namespace rgl
 {
@@ -467,6 +466,28 @@ namespace rgl
 		WriteConsole(m_hConsole, wMessage.c_str(), wMessage.length(), NULL, NULL);
 	}
 
+	// DebugDraw
+
+	void DebugDraw::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+	{
+		SDL_Point* points = new SDL_Point[vertexCount];
+
+		for (int i = 0; i < vertexCount; i++)
+		{
+			points[i].x = (int)(vertices[i].x * m_pLevel->getTileSize() - m_pLevel->getPosition().getX());
+			points[i].y = (int)(vertices[i].y * m_pLevel->getTileSize() - m_pLevel->getPosition().getY());
+		}
+
+		SDL_SetRenderDrawColor(Game::get()->getRenderer(), (int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), (int)(color.a * 255.0f));
+		SDL_RenderDrawLines(Game::get()->getRenderer(), points, vertexCount);
+		SDL_RenderDrawLine(Game::get()->getRenderer(), points[vertexCount - 1].x, points[vertexCount - 1].y, points[0].x, points[0].y);
+	}
+
+	void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
+	{
+		DrawPolygon(vertices, vertexCount, color);
+	}
+
 	// Vector2
 
 	void Vector2::setX(double x)
@@ -632,6 +653,14 @@ namespace rgl
 
 	// Level
 
+	Level::Level(int tileSize, int width, int height) : m_tileSize(tileSize), m_width(width), m_height(height),
+		m_position(0, 0), m_velocity(0, 0), m_world(b2Vec2(0.0f, 9.81f))
+	{
+		DebugDraw* debugDraw = new DebugDraw(this);
+		debugDraw->AppendFlags(b2Draw::e_shapeBit);
+		m_world.SetDebugDraw(debugDraw);
+	}
+
 	void Level::pollOperations()
 	{
 		for (auto operation : m_queuedOperations)
@@ -696,6 +725,9 @@ namespace rgl
 	{
 		for (auto layer : m_layers)
 			layer->render();
+
+		if (Game::get()->isDebugEnabled())
+			m_world.DrawDebugData();
 	}
 
 	void Level::clean()
@@ -853,6 +885,29 @@ namespace rgl
 		m_tileSize = tileSize;
 	}
 
+	void TileLayer::generateBodies()
+	{
+		for (unsigned int y = 0; y < m_tileIDs.size(); y++)
+		{
+			for (unsigned int x = 0; x < m_tileIDs[y].size(); x++)
+			{
+				if (m_tileIDs[y][x] == 0)
+					continue;
+
+				b2BodyDef bodyDef;
+				bodyDef.type = b2_staticBody;
+				bodyDef.position.Set((float)x + 0.5f, (float)y + 0.5f);
+
+				b2PolygonShape shape;
+				shape.SetAsBox(0.5f, 0.5f);
+
+				b2Body* pBody = m_pLevel->getWorld().CreateBody(&bodyDef);
+				pBody->CreateFixture(&shape, 0.0f);
+				m_pBodies.push_back(pBody);
+			}
+		}
+	}
+
 	// ObjectLayer
 
 	std::vector<std::shared_ptr<GameObject>>& ObjectLayer::getGameObjects()
@@ -906,13 +961,30 @@ namespace rgl
 
 		std::vector<std::vector<int>> data;
 
+		bool isInteractive = false;
+
 		std::string decodedIDs;
 		tinyxml2::XMLElement* pDataElement = 0;
 
 		for (tinyxml2::XMLElement* e = pTileElement->FirstChildElement(); e != 0; e = e->NextSiblingElement())
 		{
-			if (e->Value() == std::string("data"))
+			if (e->Value() == std::string("properties"))
+			{
+				for (tinyxml2::XMLElement* p = e->FirstChildElement(); p != 0; p = p->NextSiblingElement())
+				{
+					if (p->Name() == std::string("property"))
+					{
+						std::string nameAttribute = p->Attribute("name");
+
+						if (nameAttribute == std::string("interactive"))
+							isInteractive = p->BoolAttribute("value");
+					}
+				}
+			}
+			else if (e->Value() == std::string("data"))
+			{
 				pDataElement = e;
+			}
 		}
 
 		if (!pDataElement)
@@ -939,6 +1011,9 @@ namespace rgl
 				data[rows][columns] = gids[rows * pLevel->getWidth() + columns];
 
 		pTileLayer->setTileIDs(data);
+
+		if (isInteractive)
+			pTileLayer->generateBodies();
 
 		pLevel->addLayer(pTileLayer);
 	}
@@ -975,7 +1050,7 @@ namespace rgl
 					Debugger::get()->log("Undefined type for object \"" + (nameAttribute == 0 ? "(unnamed)" : std::string(nameAttribute)) + "\".", Debugger::WARNING);
 					continue;
 				}
-
+				
 				std::shared_ptr<ObjectParams> pParams = std::make_shared<ObjectParams>();
 
 				for (const tinyxml2::XMLAttribute* a = e->FirstAttribute(); a != 0; a = a->Next())
@@ -1148,7 +1223,7 @@ namespace rgl
 	void PhysicsObject::onCreate()
 	{
 		m_bodyDef.type = b2_dynamicBody;
-		m_bodyDef.position.Set((float)m_x / (float)m_pLevel->getTileSize(), (float)m_y / (float)m_pLevel->getTileSize());
+		m_bodyDef.position.Set((float)(m_x + m_width / 2) / (float)m_pLevel->getTileSize(), (float)(m_y + m_height / 2) / (float)m_pLevel->getTileSize());
 		m_shape.SetAsBox((float)m_width / (float)m_pLevel->getTileSize() * 0.5f, (float)m_height / (float)m_pLevel->getTileSize() * 0.5f);
 		m_pBody = m_pLevel->getWorld().CreateBody(&m_bodyDef);
 		m_pBody->CreateFixture(&m_shape, 0.0f);
@@ -1161,8 +1236,8 @@ namespace rgl
 
 	void PhysicsObject::update()
 	{
-		m_x = (int)(m_pBody->GetPosition().x * m_pLevel->getTileSize());
-		m_y = (int)(m_pBody->GetPosition().y * m_pLevel->getTileSize());
+		m_x = (int)(m_pBody->GetPosition().x * m_pLevel->getTileSize()) - m_width / 2;
+		m_y = (int)(m_pBody->GetPosition().y * m_pLevel->getTileSize()) - m_height / 2;
 	}
 
 	void PhysicsObject::draw()
