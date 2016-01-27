@@ -28,8 +28,8 @@ namespace rgl
 
 	public:
 
-		Button(int x, int y, int width, int height, std::string textureID, int callbackID)
-			: m_buttonState(MOUSE_AWAY), m_position(x, y), m_width(width), m_height(height),
+		Button(int x, int y, int width, int height, std::string textureID, int callbackID, std::string name = "(unnamed Button)")
+			: GameObject(name), m_buttonState(MOUSE_AWAY), m_position(x, y), m_width(width), m_height(height),
 			m_textureID(textureID), m_callbackID(callbackID) { }
 
 		virtual RGL_API void onCreate();
@@ -45,11 +45,11 @@ namespace rgl
 
 	class ButtonCreator : public ObjectCreator
 	{
-		std::shared_ptr<GameObject> createObject(const std::shared_ptr<ObjectParams> pObjectParams) const
+		std::shared_ptr<GameObject> createObject(const std::shared_ptr<ObjectParams> pObjectParams, std::string name) const
 		{
 			return std::make_shared<Button>(pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"),
 				pObjectParams->getIntParam("width"), pObjectParams->getIntParam("height"), pObjectParams->getStringParam("textureID"),
-				pObjectParams->getIntParam("callbackID"));
+				pObjectParams->getIntParam("callbackID"), name);
 		}
 	};
 }

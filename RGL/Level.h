@@ -7,6 +7,7 @@
 namespace rgl
 {
 	class GameObject;
+	class DebugDraw;
 
 	struct Tileset
 	{
@@ -44,7 +45,9 @@ namespace rgl
 		Vector2 m_position;
 		Vector2 m_velocity;
 
-		b2World m_world;
+		b2World* m_pWorld;
+
+		std::shared_ptr<DebugDraw> m_pDebugDraw;
 
 		RGL_API void pollOperations();
 
@@ -78,7 +81,7 @@ namespace rgl
 		RGL_API Vector2& getPosition();
 		RGL_API Vector2& getVelocity();
 
-		RGL_API b2World& getWorld();
+		RGL_API b2World* getWorld();
 
 	};
 }

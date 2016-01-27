@@ -3,9 +3,11 @@
 // Includes all RGL headers.
 
 #include "stdafx.h"
+#include "MathHelper.h"
 #include "Game.h"
 #include "InputHandler.h"
 #include "TextureManager.h"
+#include "FontManager.h"
 #include "SoundManager.h"
 #include "Debugger.h"
 #include "Vector2.h"
@@ -19,3 +21,4 @@
 #include "ObjectFactory.h"
 #include "GameObject.h"
 #include "Button.h"
+#include "PhysicsObject.h"

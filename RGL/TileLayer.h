@@ -24,7 +24,7 @@ namespace rgl
 
 		virtual void update() { }
 		virtual RGL_API void render();
-		virtual void clean() { }
+		virtual RGL_API void clean();
 
 		RGL_API void setTileIDs(const std::vector<std::vector<int>>& data);
 		RGL_API void setTileSize(int tileSize);

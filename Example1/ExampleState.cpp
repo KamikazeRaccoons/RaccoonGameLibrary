@@ -2,12 +2,22 @@
 
 void ExampleState::update()
 {
+	if (rgl::InputHandler::get()->isKeyDown(SDL_SCANCODE_RETURN))
+		rgl::Game::get()->getGameStateMachine()->changeState(std::make_shared<ExampleState>());
 	if (rgl::InputHandler::get()->isKeyDown(SDL_SCANCODE_LEFT))
 		m_pLevel->getVelocity().setX(-10.0f);
 	else if (rgl::InputHandler::get()->isKeyDown(SDL_SCANCODE_RIGHT))
 		m_pLevel->getVelocity().setX(10.0f);
 	else
 		m_pLevel->getVelocity() *= 0.75f;
+
+	if (rgl::InputHandler::get()->getMouseButtonState(rgl::InputHandler::LEFT))
+	{
+		m_pLevel->addObject(std::make_shared<rgl::PhysicsObject>(
+			(int)(rgl::InputHandler::get()->getMousePosition()->getX() + m_pLevel->getPosition().getX()),
+			(int)(rgl::InputHandler::get()->getMousePosition()->getY() + m_pLevel->getPosition().getY()),
+			64, 64, "Crate"), 0);
+	}
 
 	m_pLevel->update();
 }
@@ -28,11 +38,14 @@ void ExampleState::onEnter()
 	m_pLevel->addCallback(playShoot);
 
 	rgl::SoundManager::get()->load("assets/sounds/Gunshot.wav", "Gunshot", rgl::SoundManager::SFX);
+	rgl::FontManager::get()->load("assets/fonts/segoeuil.ttf", 18, "Segoe");
 }
 
 void ExampleState::onExit()
 {
 	m_pLevel->clean();
+
+	rgl::FontManager::get()->clear();
 }
 
 std::string ExampleState::getStateID() const

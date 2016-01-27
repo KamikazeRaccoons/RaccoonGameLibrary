@@ -8,13 +8,16 @@ namespace rgl
 {
 	class Level;
 
-	class GameObject
+	class GameObject : public std::enable_shared_from_this<GameObject>
 	{
 	protected:
 
 		std::shared_ptr<Level> m_pLevel;
+		std::string m_name;
 
 	public:
+
+		GameObject(std::string name = "(unnamed)") : m_name(name) { }
 
 		virtual void onCreate() = 0;
 		virtual void onDestroy() = 0;
@@ -23,6 +26,7 @@ namespace rgl
 		virtual void draw() = 0;
 
 		RGL_API void setParentLevel(std::shared_ptr<Level> pParentLevel);
+		RGL_API void setName(std::string name);
 
 	};
 }

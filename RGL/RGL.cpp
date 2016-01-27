@@ -2,9 +2,11 @@
 //
 
 #include "stdafx.h"
+#include "MathHelper.h"
 #include "Game.h"
 #include "InputHandler.h"
 #include "TextureManager.h"
+#include "FontManager.h"
 #include "SoundManager.h"
 #include "Debugger.h"
 #include "DebugDraw.h"
@@ -91,6 +93,7 @@ namespace rgl
 			return false;
 
 		SoundManager::get()->init();
+		FontManager::get()->init();
 
 		m_width = width;
 		m_height = height;
@@ -303,13 +306,13 @@ namespace rgl
 		m_textures.erase(id);
 	}
 
-	void TextureManager::draw(std::string id, int x, int y, int width, int height, SDL_RendererFlip renderFlip)
+	void TextureManager::draw(std::string id, int x, int y, int width, int height, const double angle, const SDL_Point* center, SDL_RendererFlip renderFlip)
 	{
-		drawFrame(id, x, y, width, height, 0, 0, renderFlip);
+		drawFrame(id, x, y, width, height, 0, 0, angle, center, renderFlip);
 	}
 
 	void TextureManager::drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
-		SDL_RendererFlip renderFlip)
+		const double angle, const SDL_Point* center, SDL_RendererFlip renderFlip)
 	{
 		SDL_Rect srcRect;
 		SDL_Rect destRect;
@@ -321,9 +324,9 @@ namespace rgl
 		destRect.x = x;
 		destRect.y = y;
 
-		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, renderFlip);
+		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, angle, center, renderFlip);
 	}
-
+	
 	void TextureManager::drawTile(std::string id, int margin, int spacing, int x, int y, int width, int height,
 		int currentRow, int currentFrame)
 	{
@@ -337,6 +340,83 @@ namespace rgl
 		destRect.y = y;
 
 		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, 0, 0, SDL_FLIP_NONE);
+	}
+
+	// FontManager
+
+	FontManager* FontManager::m_pInstance = 0;
+
+	FontManager* FontManager::get()
+	{
+		if (m_pInstance == 0)
+			m_pInstance = new FontManager();
+
+		return m_pInstance;
+	}
+
+	void FontManager::init()
+	{
+		if (!TTF_WasInit())
+			TTF_Init();
+	}
+
+	void FontManager::load(std::string file, int ptsize, std::string name)
+	{
+		TTF_Font* pFont = TTF_OpenFont(file.c_str(), ptsize);
+
+		if (pFont == 0)
+			Debugger::get()->log("Could not load font file \"" + file + "\"", Debugger::WARNING);
+		else
+			m_fonts[name] = TTF_OpenFont(file.c_str(), ptsize);
+	}
+
+	void FontManager::unload(std::string name)
+	{
+		TTF_CloseFont(m_fonts[name]);
+	}
+
+	void FontManager::clear()
+	{
+		for (auto font : m_fonts)
+			TTF_CloseFont(font.second);
+
+		m_fonts.clear();
+	}
+
+	void FontManager::draw(std::string name, std::string text, int x, int y, int r, int g, int b, int a)
+	{
+		SDL_Color fgColor;
+		fgColor.r = r;
+		fgColor.g = g;
+		fgColor.b = b;
+		fgColor.a = a;
+
+		SDL_Color bgColor;
+		bgColor.r = bgColor.g = bgColor.b = 0;
+		bgColor.a = 255;
+
+		SDL_Surface* pTextSurface = TTF_RenderText_Shaded(m_fonts[name], text.c_str(), fgColor, bgColor);
+		SDL_Texture* pTextTexture = SDL_CreateTextureFromSurface(Game::get()->getRenderer(), pTextSurface);
+
+		SDL_Rect srcRect;
+		SDL_Rect dstRect;
+
+		srcRect.x = 0;
+		srcRect.y = 0;
+		srcRect.w = dstRect.w = pTextSurface->w;
+		srcRect.h = dstRect.h = pTextSurface->h;
+		dstRect.x = x;
+		dstRect.y = y;
+
+		SDL_RenderCopy(Game::get()->getRenderer(), pTextTexture, &srcRect, &dstRect);
+
+		SDL_FreeSurface(pTextSurface);
+		SDL_DestroyTexture(pTextTexture);
+	}
+
+	void FontManager::draw(std::string text, int x, int y, int r, int g, int b, int a)
+	{
+		draw((--m_fonts.end())->first, text, x, y, r, g, b, a);
 	}
 
 	// SoundManager
@@ -481,6 +561,8 @@ namespace rgl
 		SDL_SetRenderDrawColor(Game::get()->getRenderer(), (int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), (int)(color.a * 255.0f));
 		SDL_RenderDrawLines(Game::get()->getRenderer(), points, vertexCount);
 		SDL_RenderDrawLine(Game::get()->getRenderer(), points[vertexCount - 1].x, points[vertexCount - 1].y, points[0].x, points[0].y);
+
+		delete[] points;
 	}
 
 	void DebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color)
@@ -590,9 +672,6 @@ namespace rgl
 			case CHANGE:
 				if (!m_gameStates.empty())
 				{
-					if (m_gameStates.back()->getStateID() == transition.second->getStateID())
-						break;
-
 					m_gameStates.back()->onExit();
 					m_gameStates.pop_back();
 				}
@@ -654,11 +733,12 @@ namespace rgl
 	// Level
 
 	Level::Level(int tileSize, int width, int height) : m_tileSize(tileSize), m_width(width), m_height(height),
-		m_position(0, 0), m_velocity(0, 0), m_world(b2Vec2(0.0f, 9.81f))
+		m_position(0, 0), m_velocity(0, 0)
 	{
-		DebugDraw* debugDraw = new DebugDraw(this);
-		debugDraw->AppendFlags(b2Draw::e_shapeBit);
-		m_world.SetDebugDraw(debugDraw);
+		m_pWorld = new b2World(b2Vec2(0.0f, 9.81f));
+		m_pDebugDraw = std::make_shared<DebugDraw>(this);
+		m_pDebugDraw->AppendFlags(b2Draw::e_shapeBit);
+		m_pWorld->SetDebugDraw(m_pDebugDraw.get());
 	}
 
 	void Level::pollOperations()
@@ -698,8 +778,12 @@ namespace rgl
 					if (pObjectLayer)
 					{
 						std::vector<std::shared_ptr<GameObject>>& gameObjects = pObjectLayer->getGameObjects();
-						std::get<1>(operation)->onDestroy();
-						gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), std::get<1>(operation)), gameObjects.end());
+
+						if (std::find(gameObjects.begin(), gameObjects.end(), std::get<1>(operation)) != gameObjects.end())
+						{
+							std::get<1>(operation)->onDestroy();
+							gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), std::get<1>(operation)), gameObjects.end());
+						}
 					}
 				}
 				break;
@@ -713,12 +797,12 @@ namespace rgl
 	{
 		m_position += m_velocity;
 
-		m_world.Step((float)Game::get()->getDeltaTime(), 6, 2);
+		pollOperations();
+
+		m_pWorld->Step((float)Game::get()->getDeltaTime(), 6, 2);
 
 		for (auto layer : m_layers)
 			layer->update();
-
-		pollOperations();
 	}
 
 	void Level::render()
@@ -727,7 +811,7 @@ namespace rgl
 			layer->render();
 
 		if (Game::get()->isDebugEnabled())
-			m_world.DrawDebugData();
+			m_pWorld->DrawDebugData();
 	}
 
 	void Level::clean()
@@ -735,8 +819,14 @@ namespace rgl
 		for (auto layer : m_layers)
 			layer->clean();
 
+		m_layers.clear();
+
 		for (auto textureID : m_textureIDs)
 			rgl::TextureManager::get()->unload(textureID);
+
+		m_textureIDs.clear();
+
+		delete m_pWorld;
 	}
 
 	int Level::getTileSize() const
@@ -826,9 +916,9 @@ namespace rgl
 		return m_velocity;
 	}
 
-	b2World& Level::getWorld()
+	b2World* Level::getWorld()
 	{
-		return m_world;
+		return m_pWorld;
 	}
 
 	// TileLayer
@@ -875,6 +965,14 @@ namespace rgl
 		}
 	}
 
+	void TileLayer::clean()
+	{
+		for (auto pBody : m_pBodies)
+			m_pLevel->getWorld()->DestroyBody(pBody);
+
+		m_pBodies.clear();
+	}
+
 	void TileLayer::setTileIDs(const std::vector<std::vector<int>>& data)
 	{
 		m_tileIDs = data;
@@ -901,7 +999,7 @@ namespace rgl
 				b2PolygonShape shape;
 				shape.SetAsBox(0.5f, 0.5f);
 
-				b2Body* pBody = m_pLevel->getWorld().CreateBody(&bodyDef);
+				b2Body* pBody = m_pLevel->getWorld()->CreateBody(&bodyDef);
 				pBody->CreateFixture(&shape, 0.0f);
 				m_pBodies.push_back(pBody);
 			}
@@ -1027,7 +1125,7 @@ namespace rgl
 				std::string nameAttribute = e->Attribute("name");
 
 				if (nameAttribute == "gravity")
-					pLevel->getWorld().SetGravity(b2Vec2(0.0f, e->FloatAttribute("value")));
+					pLevel->getWorld()->SetGravity(b2Vec2(0.0f, e->FloatAttribute("value")));
 				else
 					pLevel->addTexture(path + e->Attribute("value"), nameAttribute);
 			}
@@ -1047,7 +1145,7 @@ namespace rgl
 
 				if (typeAttribute == 0)
 				{
-					Debugger::get()->log("Undefined type for object \"" + (nameAttribute == 0 ? "(unnamed)" : std::string(nameAttribute)) + "\".", Debugger::WARNING);
+					Debugger::get()->log("Undefined type for object \"" + (nameAttribute == 0 ? "(unnamed GameObject)" : std::string(nameAttribute)) + "\".", Debugger::WARNING);
 					continue;
 				}
 				
@@ -1068,7 +1166,10 @@ namespace rgl
 					}
 				}
 
-				pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pParams));
+				if (nameAttribute == 0)
+					pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pParams));
+				else
+					pLevel->addObject(ObjectFactory::get()->create(typeAttribute, pParams, nameAttribute));
 			}
 		}
 	}
@@ -1120,7 +1221,7 @@ namespace rgl
 	}
 
 	// ObjectFactory
-
+	
 	ObjectFactory* ObjectFactory::m_pInstance = 0;
 
 	ObjectFactory* ObjectFactory::get()
@@ -1143,7 +1244,7 @@ namespace rgl
 		return true;
 	}
 
-	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID, const std::shared_ptr<ObjectParams> pObjectParams)
+	std::shared_ptr<GameObject> ObjectFactory::create(std::string typeID, const std::shared_ptr<ObjectParams> pObjectParams, std::string name)
 	{
 		std::map<std::string, std::shared_ptr<ObjectCreator>>::iterator it = m_creators.find(typeID);
 
@@ -1153,15 +1254,22 @@ namespace rgl
 			return 0;
 		}
 		
-		return it->second->createObject(pObjectParams);
+		if (name.empty())
+			name = "(unnamed " + typeID + ")";			
+
+		return it->second->createObject(pObjectParams, name);
 	}
 
 	// GameObject
 
 	void GameObject::setParentLevel(std::shared_ptr<Level> pParentLevel)
 	{
-		if (!m_pLevel)
-			m_pLevel = pParentLevel;
+		m_pLevel = pParentLevel;
+	}
+
+	void GameObject::setName(std::string name)
+	{
+		m_name = name;
 	}
 
 	// Button
@@ -1222,26 +1330,59 @@ namespace rgl
 
 	void PhysicsObject::onCreate()
 	{
+		Debugger::get()->log(m_name + " onCreate");
+
 		m_bodyDef.type = b2_dynamicBody;
 		m_bodyDef.position.Set((float)(m_x + m_width / 2) / (float)m_pLevel->getTileSize(), (float)(m_y + m_height / 2) / (float)m_pLevel->getTileSize());
-		m_shape.SetAsBox((float)m_width / (float)m_pLevel->getTileSize() * 0.5f, (float)m_height / (float)m_pLevel->getTileSize() * 0.5f);
-		m_pBody = m_pLevel->getWorld().CreateBody(&m_bodyDef);
-		m_pBody->CreateFixture(&m_shape, 0.0f);
+		b2PolygonShape* pShape = new b2PolygonShape();
+		pShape->SetAsBox((float)m_width / (float)m_pLevel->getTileSize() * 0.5f, (float)m_height / (float)m_pLevel->getTileSize() * 0.5f);
+		b2FixtureDef* fixtureDef = new b2FixtureDef();
+		fixtureDef->shape = pShape;
+		fixtureDef->density = 1.0f;
+		m_pBody = m_pLevel->getWorld()->CreateBody(&m_bodyDef);
+		addFixture(fixtureDef);
 	}
 
 	void PhysicsObject::onDestroy()
 	{
-		m_pLevel->getWorld().DestroyBody(m_pBody);
+		Debugger::get()->log(m_name + " onDestroy");
+
+		for (auto fixture : m_fixtures)
+			m_pBody->DestroyFixture(fixture);
+
+		m_pLevel->getWorld()->DestroyBody(m_pBody);
 	}
 
 	void PhysicsObject::update()
 	{
 		m_x = (int)(m_pBody->GetPosition().x * m_pLevel->getTileSize()) - m_width / 2;
 		m_y = (int)(m_pBody->GetPosition().y * m_pLevel->getTileSize()) - m_height / 2;
+
+		std::shared_ptr<Vector2> pMousePos = InputHandler::get()->getMousePosition();
+
+		int levelMousePosX = pMousePos->getX() + m_pLevel->getPosition().getX();
+		int levelMousePosY = pMousePos->getY() + m_pLevel->getPosition().getY();
+
+		if (InputHandler::get()->getMouseButtonState(InputHandler::RIGHT))
+		{
+			if (levelMousePosX < (m_x + m_width) &&
+				levelMousePosX > m_x &&
+				levelMousePosY < (m_y + m_height) &&
+				levelMousePosY > m_y)
+				m_pLevel->removeObject(shared_from_this());
+		}
 	}
 
 	void PhysicsObject::draw()
 	{
-		TextureManager::get()->draw(m_textureID, m_x - (int)m_pLevel->getPosition().getX(), m_y - (int)m_pLevel->getPosition().getY(), m_width, m_height);
+		TextureManager::get()->draw(m_textureID, m_x - (int)m_pLevel->getPosition().getX(), m_y - (int)m_pLevel->getPosition().getY(), m_width, m_height,
+			MathHelper::toDeg(m_pBody->GetAngle()));
+
+		FontManager::get()->draw("Segoe", m_name, m_x - (int)m_pLevel->getPosition().getX(), m_y - (int)m_pLevel->getPosition().getY(), 0, 255, 0, 0);
+	}
+
+	void PhysicsObject::addFixture(b2FixtureDef* pFixtureDef)
+	{
+		m_fixtures.push_back(m_pBody->CreateFixture(pFixtureDef));
 	}
 }
