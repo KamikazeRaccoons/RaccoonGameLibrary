@@ -1,6 +1,8 @@
 #pragma once
 
-#include "stdafx.h"
+#include <memory>
+#include <string>
+
 #include "ObjectParams.h"
 #include "Vector2.h"
 
@@ -17,7 +19,7 @@ namespace rgl
 
 	public:
 
-		GameObject(std::string name = "(unnamed)") : m_name(name) { }
+		GameObject(std::string name) : m_name(name) { }
 
 		virtual void onCreate() = 0;
 		virtual void onDestroy() = 0;
@@ -25,8 +27,18 @@ namespace rgl
 		virtual void update() = 0;
 		virtual void draw() = 0;
 
-		RGL_API void setParentLevel(std::shared_ptr<Level> pParentLevel);
-		RGL_API void setName(std::string name);
+		virtual int getX() = 0;
+		virtual int getY() = 0;
+
+		virtual int getWidth() = 0;
+		virtual int getHeight() = 0;
+
+		void setParentLevel(std::shared_ptr<Level> pParentLevel);
+		void setName(std::string name);
+
+		int getDiameter();
+
+		void debugDrawName();
 
 	};
 }

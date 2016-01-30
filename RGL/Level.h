@@ -1,13 +1,19 @@
 #pragma once
 
-#include "stdafx.h"
+#include <vector>
+#include <memory>
+#include <tuple>
+#include <functional>
+
 #include "Layer.h"
 #include "ObjectParams.h"
+#include "DebugDraw.h"
+#include "Vector2.h"
 
 namespace rgl
 {
 	class GameObject;
-	class DebugDraw;
+	class Layer;
 
 	struct Tileset
 	{
@@ -47,41 +53,41 @@ namespace rgl
 
 		b2World* m_pWorld;
 
-		std::shared_ptr<DebugDraw> m_pDebugDraw;
+		DebugDraw m_debugDraw;
 
-		RGL_API void pollOperations();
+		void pollOperations();
 
 	public:
 
-		RGL_API Level(int tileSize, int width, int height);
+		Level(int tileSize, int width, int height);
 		~Level() { }
 
-		RGL_API void update();
-		RGL_API void render();
-		RGL_API void clean();
+		void update();
+		void render();
+		void clean();
 
-		RGL_API int getTileSize() const;
-		RGL_API int getWidth() const;
-		RGL_API int getHeight() const;
+		int getTileSize() const;
+		int getWidth() const;
+		int getHeight() const;
 
-		RGL_API void addCallback(std::function<void()> callback);
-		RGL_API std::function<void()> getCallback(int callbackID);
+		void addCallback(std::function<void()> callback);
+		std::function<void()> getCallback(int callbackID);
 
-		RGL_API void addLayer(std::shared_ptr<Layer> pLayer);
+		void addLayer(std::shared_ptr<Layer> pLayer);
 
-		RGL_API void addTexture(std::string file, std::string textureID);
+		void addTexture(std::string file, std::string textureID);
 
-		RGL_API void addObject(std::shared_ptr<GameObject> pObject, int objectLayer = -1);
-		RGL_API void removeObject(std::shared_ptr<GameObject> pObject);
+		void addObject(std::shared_ptr<GameObject> pObject, int objectLayer = -1);
+		void removeObject(std::shared_ptr<GameObject> pObject);
 
-		RGL_API Tileset getTilesetByID(int tileID);
+		Tileset getTilesetByID(int tileID);
 
-		RGL_API std::vector<Tileset>& getTilesets();
+		std::vector<Tileset>& getTilesets();
 
-		RGL_API Vector2& getPosition();
-		RGL_API Vector2& getVelocity();
+		Vector2& getPosition();
+		Vector2& getVelocity();
 
-		RGL_API b2World* getWorld();
+		b2World* getWorld();
 
 	};
 }

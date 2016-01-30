@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
+#include <memory>
+
+#include <SDL.h>
+
 #include "GameState.h"
 #include "GameStateMachine.h"
 
@@ -28,32 +31,32 @@ namespace rgl
 		Game() : m_running(false) { }
 		~Game() { }
 
-		RGL_API void pollEvents();
-		RGL_API void update();
-		RGL_API void render();
-		RGL_API void clean();
+		void pollEvents();
+		void update();
+		void render();
+		void clean();
 
 	public:
 
-		static RGL_API Game* get();
+		static Game* get();
 
-		RGL_API void setFrameRate(double frameRate);
-		RGL_API double getDeltaTime() const;
+		void setFrameRate(double frameRate);
+		double getDeltaTime() const;
 
-		RGL_API SDL_Window* getWindow();
-		RGL_API SDL_Renderer* getRenderer();
+		SDL_Window* getWindow();
+		SDL_Renderer* getRenderer();
 
-		RGL_API bool isDebugEnabled() const;
+		bool isDebugEnabled() const;
 
-		RGL_API int getWidth() const;
-		RGL_API int getHeight() const;
+		int getWidth() const;
+		int getHeight() const;
 
-		RGL_API std::shared_ptr<GameStateMachine> getGameStateMachine();
+		std::shared_ptr<GameStateMachine> getGameStateMachine();
 
-		RGL_API bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState,
+		bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState,
 			bool useDebugging = false, bool fullscreen = false, double frameRate = 60.0);
 
-		RGL_API void quit();
+		void quit();
 
 	};
 

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "stdafx.h"
+#include <vector>
+#include <memory>
+
 #include "GameState.h"
 
 namespace rgl
@@ -19,19 +21,19 @@ namespace rgl
 		std::vector<std::shared_ptr<GameState>> m_gameStates;
 		std::vector<std::pair<TransitionType, std::shared_ptr<GameState>>> m_queuedTransitions;
 
-		RGL_API void pollTransitions();
+		void pollTransitions();
 
 	public:
 
 		GameStateMachine() { }
 		~GameStateMachine() { }
 
-		RGL_API void pushState(std::shared_ptr<GameState> pGameState);
-		RGL_API void changeState(std::shared_ptr<GameState> pGameState);
-		RGL_API void popState();
+		void pushState(std::shared_ptr<GameState> pGameState);
+		void changeState(std::shared_ptr<GameState> pGameState);
+		void popState();
 
-		RGL_API void update();
-		RGL_API void render();
-		RGL_API void clean();
+		void update();
+		void render();
+		void clean();
 	};
 }

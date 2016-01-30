@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
+#include <map>
+#include <string>
+
+#include <SDL_ttf.h>
 
 namespace rgl
 {
@@ -14,14 +17,14 @@ namespace rgl
 
 	public:
 
-		static RGL_API FontManager* get();
+		static FontManager* get();
 
-		RGL_API void init();
-		RGL_API void load(std::string file, int ptsize, std::string name);
-		RGL_API void unload(std::string name);
-		RGL_API void clear();
-		RGL_API void draw(std::string name, std::string text, int x, int y, int r, int g, int b, int a);
-		RGL_API void draw(std::string text, int x, int y, int r, int g, int b, int a);
+		void init();
+		void load(std::string file, int ptsize, std::string name);
+		void unload(std::string name);
+		void clear();
+		void draw(std::string name, std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR = 0, int bgG = 0, int bgB = 0, int bgA = 0);
+		void draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR = 0, int bgG = 0, int bgB = 0, int bgA = 0);
 
 	};
 }

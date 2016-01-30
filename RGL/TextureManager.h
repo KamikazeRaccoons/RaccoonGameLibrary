@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
+#include <map>
+#include <string>
+
+#include <SDL.h>
 
 namespace rgl
 {
@@ -17,16 +20,16 @@ namespace rgl
 
 	public:
 
-		static RGL_API TextureManager* get();
+		static TextureManager* get();
 
-		RGL_API bool load(std::string fileName, std::string id);
-		RGL_API void unload(std::string id);
+		bool load(std::string fileName, std::string id);
+		void unload(std::string id);
 
-		RGL_API void draw(std::string id, int x, int y, int width, int height, const double angle = 0.0,
+		void draw(std::string id, int x, int y, int width, int height, const double angle = 0.0,
 			const SDL_Point* center = 0, SDL_RendererFlip renderFlip = SDL_FLIP_NONE);
-		RGL_API void drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
+		void drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
 			const double angle = 0.0, const SDL_Point* center = 0, SDL_RendererFlip renderFlip = SDL_FLIP_NONE);
-		RGL_API void drawTile(std::string id, int margin, int spacing, int x, int y, int width, int height,
+		void drawTile(std::string id, int margin, int spacing, int x, int y, int width, int height,
 			int currentRow, int currentFrame);
 
 	};

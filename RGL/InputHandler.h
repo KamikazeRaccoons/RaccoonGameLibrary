@@ -1,6 +1,10 @@
 #pragma once
 
-#include "stdafx.h"
+#include <vector>
+#include <memory>
+
+#include <SDL.h>
+
 #include "Vector2.h"
 
 namespace rgl
@@ -17,12 +21,12 @@ namespace rgl
 
 		const Uint8* m_pKeystates;
 
-		RGL_API InputHandler();
+		InputHandler();
 		~InputHandler() { }
 
-		RGL_API void onMouseButtonDown(SDL_Event& event);
-		RGL_API void onMouseButtonUp(SDL_Event& event);
-		RGL_API void onMouseMove(SDL_Event& event);
+		void onMouseButtonDown(SDL_Event& event);
+		void onMouseButtonUp(SDL_Event& event);
+		void onMouseMove(SDL_Event& event);
 
 	public:
 
@@ -33,14 +37,14 @@ namespace rgl
 			RIGHT = 2
 		};
 
-		static RGL_API InputHandler* get();
+		static InputHandler* get();
 
-		RGL_API bool getMouseButtonState(int buttonID);
-		RGL_API std::shared_ptr<Vector2> getMousePosition();
+		bool getMouseButtonState(int buttonID);
+		std::shared_ptr<Vector2> getMousePosition();
 
-		RGL_API bool isKeyDown(SDL_Scancode key);
+		bool isKeyDown(SDL_Scancode key);
 
-		RGL_API void update();
+		void update();
 
 	};
 }

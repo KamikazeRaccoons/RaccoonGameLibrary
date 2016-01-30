@@ -1,6 +1,8 @@
 #pragma once
 
-#include "stdafx.h"
+#include <string>
+
+#include <Windows.h>
 
 namespace rgl
 {
@@ -25,10 +27,10 @@ namespace rgl
 			FATAL_ERROR = 2
 		} m_lastLogType;
 		
-		static RGL_API Debugger* get();
+		static Debugger* get();
 
-		RGL_API void init(std::string title);
-		RGL_API void log(std::string message, LogType logType = MESSAGE);
+		void init(std::string title);
+		void log(std::string message, LogType logType = MESSAGE);
 
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "stdafx.h"
+#include <map>
+#include <string>
 
 namespace rgl
 {
@@ -15,10 +16,10 @@ namespace rgl
 		ObjectParams() { }
 		~ObjectParams() { }
 
-		RGL_API void setParam(std::string name, std::string value);
-		RGL_API std::string getStringParam(std::string name);
-		RGL_API int getIntParam(std::string name);
-		RGL_API double getDoubleParam(std::string name);
+		void setParam(std::string name, std::string value);
+		std::string getStringParam(std::string name);
+		int getIntParam(std::string name);
+		double getDoubleParam(std::string name);
 
 	};
 }

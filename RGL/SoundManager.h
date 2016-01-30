@@ -1,6 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
+#include <map>
+#include <string>
+
+#include <SDL_mixer.h>
 
 namespace rgl
 {
@@ -24,14 +27,14 @@ namespace rgl
 			SFX = 1
 		};
 
-		static RGL_API SoundManager* get();
+		static SoundManager* get();
 
-		RGL_API void init();
-		RGL_API bool load(std::string filename, std::string id, SoundType soundType);
-		RGL_API void clean();
+		void init();
+		bool load(std::string filename, std::string id, SoundType soundType);
+		void clean();
 
-		RGL_API void playSound(std::string id, int loops);
-		RGL_API void playMusic(std::string id, int loops);
+		void playSound(std::string id, int loops);
+		void playMusic(std::string id, int loops);
 
 	};
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "Layer.h"
 #include "Level.h"
 #include "Vector2.h"
@@ -20,15 +19,15 @@ namespace rgl
 
 	public:
 
-		RGL_API TileLayer(std::shared_ptr<Level> pLevel);
+		TileLayer(std::shared_ptr<Level> pLevel);
 
 		virtual void update() { }
-		virtual RGL_API void render();
-		virtual RGL_API void clean();
+		virtual void render();
+		virtual void clean();
 
-		RGL_API void setTileIDs(const std::vector<std::vector<int>>& data);
-		RGL_API void setTileSize(int tileSize);
-		RGL_API void generateBodies();
+		void setTileIDs(const std::vector<std::vector<int>>& data);
+		void setTileSize(int tileSize);
+		void generateBodies();
 
 	};
 }

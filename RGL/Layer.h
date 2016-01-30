@@ -1,10 +1,11 @@
 #pragma once
 
-#include "stdafx.h"
 #include "Level.h"
 
 namespace rgl
 {
+	class Level;
+
 	class Layer
 	{
 	protected:

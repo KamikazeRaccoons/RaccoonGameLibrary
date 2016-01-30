@@ -22,12 +22,12 @@
   </data>
  </layer>
  <objectgroup name="Interactive Objects">
-  <object id="10" name="Crate1" type="PhysicsObject" x="228" y="31" width="64" height="64">
+  <object id="10" name="Crate1" type="Crate" x="228" y="31" width="64" height="64">
    <properties>
     <property name="textureID" value="Crate"/>
    </properties>
   </object>
-  <object id="11" name="Crate2" type="PhysicsObject" x="287" y="252" width="64" height="64">
+  <object id="11" name="Crate2" type="Crate" x="287" y="252" width="64" height="64">
    <properties>
     <property name="textureID" value="Crate"/>
    </properties>
@@ -38,12 +38,6 @@
    <properties>
     <property name="callbackID" value="0"/>
     <property name="textureID" value="ExitButton"/>
-   </properties>
-  </object>
-  <object id="7" name="ShootButton" type="Button" x="8" y="48" width="64" height="32">
-   <properties>
-    <property name="callbackID" value="1"/>
-    <property name="textureID" value="ShootButton"/>
    </properties>
   </object>
  </objectgroup>

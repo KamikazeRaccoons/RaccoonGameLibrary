@@ -1,6 +1,5 @@
 #pragma once
 
-#include "stdafx.h"
 #include "Layer.h"
 #include "GameObject.h"
 
@@ -16,11 +15,11 @@ namespace rgl
 
 		ObjectLayer(std::shared_ptr<Level> pLevel) : Layer(pLevel) { }
 
-		virtual RGL_API void update();
-		virtual RGL_API void render();
-		virtual RGL_API void clean();
+		virtual void update();
+		virtual void render();
+		virtual void clean();
 
-		RGL_API std::vector<std::shared_ptr<GameObject>>& getGameObjects();
+		std::vector<std::shared_ptr<GameObject>>& getGameObjects();
 
 	};
 }

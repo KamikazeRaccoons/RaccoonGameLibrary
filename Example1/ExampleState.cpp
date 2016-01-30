@@ -1,4 +1,5 @@
 #include "ExampleState.h"
+#include "Crate.h"
 
 void ExampleState::update()
 {
@@ -11,12 +12,21 @@ void ExampleState::update()
 	else
 		m_pLevel->getVelocity() *= 0.75f;
 
-	if (rgl::InputHandler::get()->getMouseButtonState(rgl::InputHandler::LEFT))
+	if (rgl::InputHandler::get()->getMouseButtonState(rgl::InputHandler::MIDDLE))
 	{
-		m_pLevel->addObject(std::make_shared<rgl::PhysicsObject>(
-			(int)(rgl::InputHandler::get()->getMousePosition()->getX() + m_pLevel->getPosition().getX()),
-			(int)(rgl::InputHandler::get()->getMousePosition()->getY() + m_pLevel->getPosition().getY()),
-			64, 64, "Crate"), 0);
+		spawnCrate();
+	}
+	else if (rgl::InputHandler::get()->getMouseButtonState(rgl::InputHandler::LEFT))
+	{
+		if (!m_pressed)
+		{
+			m_pressed = true;
+			spawnCrate();
+		}
+	}
+	else
+	{
+		m_pressed = false;
 	}
 
 	m_pLevel->update();
@@ -35,9 +45,7 @@ void ExampleState::onEnter()
 	m_pLevel = rgl::LevelParser::parseLevel("assets/levels/map1/", "map1.tmx");
 
 	m_pLevel->addCallback(quitState);
-	m_pLevel->addCallback(playShoot);
 
-	rgl::SoundManager::get()->load("assets/sounds/Gunshot.wav", "Gunshot", rgl::SoundManager::SFX);
 	rgl::FontManager::get()->load("assets/fonts/segoeuil.ttf", 18, "Segoe");
 }
 
@@ -53,12 +61,16 @@ std::string ExampleState::getStateID() const
 	return "ExampleState";
 }
 
+void ExampleState::spawnCrate()
+{
+	m_pLevel->addObject(std::make_shared<Crate>(
+		(int)(rgl::InputHandler::get()->getMousePosition()->getX() + m_pLevel->getPosition().getX()),
+		(int)(rgl::InputHandler::get()->getMousePosition()->getY() + m_pLevel->getPosition().getY()),
+		64, 64, "Crate", "Crate" + std::to_string(m_crateID)), 0);
+	m_crateID++;
+}
+
 void ExampleState::quitState()
 {
 	rgl::Game::get()->quit();
-}
-
-void ExampleState::playShoot()
-{
-	rgl::SoundManager::get()->playSound("Gunshot", 0);
 }

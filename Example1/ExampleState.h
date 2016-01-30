@@ -10,12 +10,15 @@ private:
 
 	bool m_pressed;
 
+	int m_crateID;
+
+	void spawnCrate();
+
 	static void quitState();
-	static void playShoot();
 
 public:
 
-	ExampleState() { }
+	ExampleState() : m_crateID(3) { }
 	~ExampleState() { }
 
 	virtual void update();

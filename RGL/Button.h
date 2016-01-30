@@ -1,5 +1,9 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <string>
+
 #include "GameObject.h"
 #include "ObjectFactory.h"
 
@@ -32,15 +36,17 @@ namespace rgl
 			: GameObject(name), m_buttonState(MOUSE_AWAY), m_position(x, y), m_width(width), m_height(height),
 			m_textureID(textureID), m_callbackID(callbackID) { }
 
-		virtual RGL_API void onCreate();
+		virtual void onCreate();
 		virtual void onDestroy() { }
 
-		virtual RGL_API void update();
-		virtual RGL_API void draw();
+		virtual void update();
+		virtual void draw();
 
-		RGL_API Vector2& getPosition();
-		RGL_API int getWidth();
-		RGL_API int getHeight();
+		virtual int getX();
+		virtual int getY();
+
+		virtual int getWidth();
+		virtual int getHeight();
 	};
 
 	class ButtonCreator : public ObjectCreator
