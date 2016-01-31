@@ -84,7 +84,7 @@ namespace rgl
 		pTileLayer->setTileIDs(data);
 
 		if (isInteractive)
-			pTileLayer->generateBodies();
+			pTileLayer->generateFixtures();
 
 		pLevel->addLayer(pTileLayer);
 	}

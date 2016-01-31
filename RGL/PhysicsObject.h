@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <Box2D\Box2D.h>
 
@@ -25,6 +26,10 @@ namespace rgl
 
 		std::string m_textureID;
 
+		std::vector<b2Fixture*> m_fixtures;
+
+		void addFixture(b2FixtureDef* pFixtureDef);
+
 	public:
 
 		PhysicsObject(int x, int y, int width, int height, b2BodyType bodyType, std::string textureID, std::string name)
@@ -42,20 +47,5 @@ namespace rgl
 		virtual int getWidth();
 		virtual int getHeight();
 
-	};
-
-	class PhysicsObjectCreator : public ObjectCreator
-	{
-		virtual std::shared_ptr<GameObject> createObject(const std::shared_ptr<ObjectParams> pObjectParams, std::string name) const
-		{
-			b2BodyType bodyType = b2_staticBody;
-			std::string bodyTypeParam = pObjectParams->getStringParam("bodyType");
-
-			if (bodyTypeParam == "dynamicBody")
-				bodyType = b2_dynamicBody;
-
-			return std::make_shared<PhysicsObject>(pObjectParams->getIntParam("x"), pObjectParams->getIntParam("y"),
-				pObjectParams->getIntParam("width"), pObjectParams->getIntParam("height"), bodyType, pObjectParams->getStringParam("textureID"), name);
-		}
 	};
 }

@@ -4,14 +4,15 @@ void Crate::onCreate()
 {
 	rgl::PhysicsObject::onCreate();
 
-	b2PolygonShape* pShape = new b2PolygonShape();
-	pShape->SetAsBox((float)m_width / (float)m_pLevel->getTileSize() * 0.5f, (float)m_height / (float)m_pLevel->getTileSize() * 0.5f);
+	b2PolygonShape shape;
+	shape.SetAsBox((float)m_width / (float)m_pLevel->getTileSize() * 0.5f, (float)m_height / (float)m_pLevel->getTileSize() * 0.5f);
 
-	b2FixtureDef *pFixtureDef = new b2FixtureDef();
-	pFixtureDef->shape = pShape;
-	pFixtureDef->density = 1.0f;
-	pFixtureDef->friction = 0.3f;
-	m_pBody->CreateFixture(pFixtureDef);
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &shape;
+	fixtureDef.density = 1.0f;
+	fixtureDef.friction = 0.4f;
+	fixtureDef.restitution = 0.2f;
+	addFixture(&fixtureDef);
 }
 
 void Crate::update()

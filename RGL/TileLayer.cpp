@@ -11,6 +11,11 @@ namespace rgl
 	{
 		m_numColumns = (int)std::ceil((float)Game::get()->getWidth() / (float)m_tileSize) + 1;
 		m_numRows = (int)std::ceil((float)Game::get()->getHeight() / (float)m_tileSize) + 1;
+
+		b2BodyDef bodyDef;
+		bodyDef.type = b2_staticBody;
+		bodyDef.position.Set(0.0f, 0.0f);
+		m_pBody = m_pLevel->getWorld()->CreateBody(&bodyDef);
 	}
 
 	void TileLayer::render()
@@ -43,17 +48,17 @@ namespace rgl
 
 				TextureManager::get()->drawTile(tileset.name, tileset.margin, tileset.spacing,
 					(j * m_tileSize) - x2, (i * m_tileSize) - y2, m_tileSize, m_tileSize,
-					(id - (tileset.firstGridID - 1)) / std::max(tileset.numColumns, 1), (id - (tileset.firstGridID - 1)) % std::max(tileset.numColumns, 1));
+					(id - (tileset.firstGridID - 1)) / max(tileset.numColumns, 1), (id - (tileset.firstGridID - 1)) % max(tileset.numColumns, 1));
 			}
 		}
 	}
 
 	void TileLayer::clean()
 	{
-		for (auto pBody : m_pBodies)
-			m_pLevel->getWorld()->DestroyBody(pBody);
+		for (auto fixture : m_fixtures)
+			m_pBody->DestroyFixture(fixture);
 
-		m_pBodies.clear();
+		m_pLevel->getWorld()->DestroyBody(m_pBody);
 	}
 
 	void TileLayer::setTileIDs(const std::vector<std::vector<int>>& data)
@@ -66,7 +71,7 @@ namespace rgl
 		m_tileSize = tileSize;
 	}
 
-	void TileLayer::generateBodies()
+	void TileLayer::generateFixtures()
 	{
 		for (unsigned int y = 0; y < m_tileIDs.size(); y++)
 		{
@@ -75,17 +80,39 @@ namespace rgl
 				if (m_tileIDs[y][x] == 0)
 					continue;
 
-				b2BodyDef bodyDef;
-				bodyDef.type = b2_staticBody;
-				bodyDef.position.Set((float)x + 0.5f, (float)y + 0.5f);
+				if (!checkTileAt(x - 1, y))
+				{
+					b2EdgeShape edgeShape;
+					edgeShape.Set(b2Vec2((float)x, (float)y), b2Vec2((float)x, (float)(y + 1)));
+					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
+				}
 
-				b2PolygonShape shape;
-				shape.SetAsBox(0.5f, 0.5f);
+				if (!checkTileAt(x, y - 1))
+				{
+					b2EdgeShape edgeShape;
+					edgeShape.Set(b2Vec2((float)x, (float)y), b2Vec2((float)(x + 1), (float)y));
+					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
+				}
 
-				b2Body* pBody = m_pLevel->getWorld()->CreateBody(&bodyDef);
-				pBody->CreateFixture(&shape, 0.0f);
-				m_pBodies.push_back(pBody);
+				if (!checkTileAt(x + 1, y))
+				{
+					b2EdgeShape edgeShape;
+					edgeShape.Set(b2Vec2((float)(x + 1), (float)y), b2Vec2((float)(x + 1), (float)(y + 1)));
+					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
+				}
+
+				if (!checkTileAt(x, y + 1))
+				{
+					b2EdgeShape edgeShape;
+					edgeShape.Set(b2Vec2((float)x, (float)(y + 1)), b2Vec2((float)(x + 1), (float)(y + 1)));
+					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
+				}
 			}
 		}
+	}
+
+	bool TileLayer::checkTileAt(int x, int y)
+	{
+		return (y < 0 || x < 0 || y >= (int)m_tileIDs.size() || x >= (int)m_tileIDs[y].size() || m_tileIDs[y][x] == 0) ? false : true;
 	}
 }

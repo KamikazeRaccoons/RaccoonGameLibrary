@@ -72,7 +72,7 @@ namespace rgl
 
 		pollOperations();
 
-		m_pWorld->Step((float)Game::get()->getDeltaTime(), 6, 2);
+		m_pWorld->Step((float)Game::get()->getDeltaTime(), 8, 3);
 
 		for (auto layer : m_layers)
 			layer->update();
@@ -99,7 +99,7 @@ namespace rgl
 
 		m_textureIDs.clear();
 
-		m_pWorld->Dump();
+		delete m_pWorld;
 	}
 
 	int Level::getTileSize() const

@@ -86,7 +86,6 @@ namespace rgl
 		m_running = true;
 
 		ObjectFactory::get()->registerType("Button", std::make_shared<ButtonCreator>());
-		ObjectFactory::get()->registerType("PhysicsObject", std::make_shared<PhysicsObjectCreator>());
 
 		m_pGameStateMachine = std::make_shared<GameStateMachine>();
 		m_pGameStateMachine->changeState(pInitState);

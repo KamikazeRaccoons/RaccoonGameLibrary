@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <RGL.h>
+
 #include "ExampleState.h"
 #include "Crate.h"
 

@@ -15,6 +15,9 @@ namespace rgl
 
 	void PhysicsObject::onDestroy()
 	{
+		for (auto fixture : m_fixtures)
+			m_pBody->DestroyFixture(fixture);
+
 		m_pLevel->getWorld()->DestroyBody(m_pBody);
 	}
 
@@ -48,5 +51,10 @@ namespace rgl
 	int PhysicsObject::getHeight()
 	{
 		return m_height;
+	}
+
+	void PhysicsObject::addFixture(b2FixtureDef* pFixtureDef)
+	{
+		m_fixtures.push_back(m_pBody->CreateFixture(pFixtureDef));
 	}
 }

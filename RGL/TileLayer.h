@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+
+#include <Box2D\Box2D.h>
+
 #include "Layer.h"
 #include "Level.h"
 #include "Vector2.h"
@@ -15,7 +19,11 @@ namespace rgl
 		int m_tileSize;
 
 		std::vector<std::vector<int>> m_tileIDs;
-		std::vector<b2Body*> m_pBodies;
+
+		b2Body* m_pBody;
+		std::vector<b2Fixture*> m_fixtures;
+
+		bool checkTileAt(int x, int y);
 
 	public:
 
@@ -27,7 +35,7 @@ namespace rgl
 
 		void setTileIDs(const std::vector<std::vector<int>>& data);
 		void setTileSize(int tileSize);
-		void generateBodies();
+		void generateFixtures();
 
 	};
 }
