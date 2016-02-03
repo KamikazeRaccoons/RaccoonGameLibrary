@@ -47,5 +47,8 @@ namespace rgl
 		virtual int getWidth();
 		virtual int getHeight();
 
+		virtual void onBeginContact(Vector2 contactPosition, PhysicsObject* pPhysicsObject) { };
+		virtual void onEndContact(Vector2 contactPosition, PhysicsObject* pPhysicsObject) { }
+
 	};
 }

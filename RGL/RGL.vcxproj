@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="ContactListener.cpp" />
     <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="FontManager.cpp" />
@@ -165,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="base64.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="ContactListener.h" />
     <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="FontManager.h" />

@@ -9,8 +9,9 @@ namespace rgl
 	{
 		b2BodyDef bodyDef;
 		bodyDef.type = m_bodyType;
-		bodyDef.position.Set((float)(m_x + m_width / 2) / (float)m_pLevel->getTileSize(), (float)(m_y + m_height / 2) / (float)m_pLevel->getTileSize());
+		bodyDef.position.Set(m_pLevel->toTileUnits(m_x + m_width / 2), m_pLevel->toTileUnits(m_y + m_height / 2));
 		m_pBody = m_pLevel->getWorld()->CreateBody(&bodyDef);
+		m_pBody->SetUserData(this);
 	}
 
 	void PhysicsObject::onDestroy()
@@ -23,13 +24,13 @@ namespace rgl
 
 	void PhysicsObject::update()
 	{
-		m_x = (int)(m_pBody->GetPosition().x * m_pLevel->getTileSize()) - m_width / 2;
-		m_y = (int)(m_pBody->GetPosition().y * m_pLevel->getTileSize()) - m_height / 2;
+		m_x = m_pLevel->toPixelUnits(m_pBody->GetPosition().x) - m_width / 2;
+		m_y = m_pLevel->toPixelUnits(m_pBody->GetPosition().y) - m_height / 2;
 	}
 
 	void PhysicsObject::draw()
 	{
-		TextureManager::get()->draw(m_textureID, m_x - (int)m_pLevel->getPosition().getX(), m_y - (int)m_pLevel->getPosition().getY(), m_width, m_height,
+		TextureManager::get()->draw(m_textureID, m_pLevel->toLevelPositionX(m_x), m_pLevel->toLevelPositionY(m_y), m_width, m_height,
 			MathHelper::toDeg(m_pBody->GetAngle()));
 	}
 

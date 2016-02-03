@@ -22,7 +22,7 @@ namespace rgl
 
 	void GameObject::debugDrawName()
 	{
-		FontManager::get()->draw(m_name, getX() - (int)m_pLevel->getPosition().getX(), getY() - (int)m_pLevel->getPosition().getY(),
+		FontManager::get()->draw(m_name, m_pLevel->toLevelPositionX(getX()), m_pLevel->toLevelPositionY(getY()),
 			0, 255, 0, 127, 0, 0, 0, 127);
 	}
 }

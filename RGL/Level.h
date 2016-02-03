@@ -8,6 +8,7 @@
 #include "Layer.h"
 #include "ObjectParams.h"
 #include "DebugDraw.h"
+#include "ContactListener.h"
 #include "Vector2.h"
 
 namespace rgl
@@ -54,6 +55,7 @@ namespace rgl
 		b2World* m_pWorld;
 
 		DebugDraw m_debugDraw;
+		ContactListener m_contactListener;
 
 		void pollOperations();
 
@@ -89,5 +91,12 @@ namespace rgl
 
 		b2World* getWorld();
 
+		int toPixelUnits(float tileUnits);
+		float toTileUnits(int pixelUnits);
+
+		int toLevelPositionX(int globalPositionX);
+		int toLevelPositionY(int globalPositionY);
+		Vector2 toLevelPosition(Vector2 globalPosition);
+		Vector2 getLevelMousePosition();
 	};
 }

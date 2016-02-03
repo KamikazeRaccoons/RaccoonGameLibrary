@@ -2,6 +2,7 @@
 #include "ObjectLayer.h"
 #include "Game.h"
 #include "TextureManager.h"
+#include "InputHandler.h"
 #include "Debugger.h"
 
 namespace rgl
@@ -12,6 +13,7 @@ namespace rgl
 		m_pWorld = new b2World(b2Vec2(0.0f, 9.81f));
 		m_debugDraw.AppendFlags(b2Draw::e_shapeBit);
 		m_pWorld->SetDebugDraw(&m_debugDraw);
+		m_pWorld->SetContactListener(&m_contactListener);
 	}
 
 	void Level::pollOperations()
@@ -192,5 +194,35 @@ namespace rgl
 	b2World* Level::getWorld()
 	{
 		return m_pWorld;
+	}
+
+	int Level::toPixelUnits(float tileUnits)
+	{
+		return (int)(tileUnits * m_tileSize);
+	}
+
+	float Level::toTileUnits(int pixelUnits)
+	{
+		return (float)pixelUnits / (float)m_tileSize;
+	}
+
+	int Level::toLevelPositionX(int globalPositionX)
+	{
+		return globalPositionX - (int)m_position.getX();
+	}
+
+	int Level::toLevelPositionY(int globalPositionY)
+	{
+		return globalPositionY - (int)m_position.getY();
+	}
+
+	Vector2 Level::toLevelPosition(Vector2 globalPosition)
+	{
+		return globalPosition - m_position;
+	}
+
+	Vector2 Level::getLevelMousePosition()
+	{
+		return *InputHandler::get()->getMousePosition().get() + m_position;
 	}
 }
