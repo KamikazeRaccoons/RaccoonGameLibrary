@@ -41,12 +41,12 @@ namespace rgl
 		m_textures.erase(id);
 	}
 
-	void TextureManager::draw(std::string id, int x, int y, int width, int height, const double angle, const SDL_Point* center, SDL_RendererFlip renderFlip)
+	void TextureManager::draw(std::string id, int x, int y, int width, int height, int alpha, const double angle, const SDL_Point* center, SDL_RendererFlip renderFlip)
 	{
-		drawFrame(id, x, y, width, height, 0, 0, angle, center, renderFlip);
+		drawFrame(id, x, y, width, height, 0, 0, alpha, angle, center, renderFlip);
 	}
 
-	void TextureManager::drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame,
+	void TextureManager::drawFrame(std::string id, int x, int y, int width, int height, int currentRow, int currentFrame, int alpha,
 		const double angle, const SDL_Point* center, SDL_RendererFlip renderFlip)
 	{
 		SDL_Rect srcRect;
@@ -59,6 +59,7 @@ namespace rgl
 		destRect.x = x;
 		destRect.y = y;
 
+		SDL_SetTextureAlphaMod(m_textures[id], alpha);
 		SDL_RenderCopyEx(Game::get()->getRenderer(), m_textures[id], &srcRect, &destRect, angle, center, renderFlip);
 	}
 

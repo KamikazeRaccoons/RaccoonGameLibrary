@@ -3,6 +3,8 @@
  <properties>
   <property name="Crate" value="Crate.png"/>
   <property name="ExitButton" value="ExitButton.png"/>
+  <property name="Leaf" value="Leaf.png"/>
+  <property name="Poof" value="Poof.png"/>
  </properties>
  <tileset firstgid="1" name="blocks1" tilewidth="32" tileheight="32" spacing="2" margin="2" tilecount="198">
   <image source="blocks1.png" width="614" height="376"/>

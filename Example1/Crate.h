@@ -6,20 +6,18 @@ class Crate : public rgl::PhysicsObject
 {
 private:
 
-	rgl::Vector2 m_contactPosition;
-
-	bool m_colliding;
-
+	rgl::Emitter m_leafEmitter;
+	rgl::Emitter m_poofEmitter;
+	
 public:
 
 	Crate(int x, int y, int width, int height, std::string textureID, std::string name)
-		: rgl::PhysicsObject(x, y, width, height, b2_dynamicBody, textureID, name), m_colliding(false) { }
+		: rgl::PhysicsObject(x, y, width, height, b2_dynamicBody, textureID, name) { }
 	
 	virtual void onCreate();
 	virtual void update();
 	virtual void draw();
 	virtual void onBeginContact(rgl::Vector2 contactPosition, rgl::PhysicsObject* pPhysicsObject);
-	virtual void onEndContact(rgl::Vector2 contactPosition, rgl::PhysicsObject* pPhysicsObject);
 
 };
 

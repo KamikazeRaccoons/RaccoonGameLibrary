@@ -32,7 +32,7 @@ namespace rgl
 
 	public:
 
-		Button(int x, int y, int width, int height, std::string textureID, int callbackID, std::string name)
+		Button(int x, int y, int width, int height, std::string textureID, int callbackID, std::string name = "(unnamed Button)")
 			: GameObject(name), m_buttonState(MOUSE_AWAY), m_position(x, y), m_width(width), m_height(height),
 			m_textureID(textureID), m_callbackID(callbackID) { }
 

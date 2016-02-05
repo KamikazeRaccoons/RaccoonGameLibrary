@@ -32,7 +32,7 @@ namespace rgl
 
 	public:
 
-		PhysicsObject(int x, int y, int width, int height, b2BodyType bodyType, std::string textureID, std::string name)
+		PhysicsObject(int x, int y, int width, int height, b2BodyType bodyType, std::string textureID, std::string name = "(unnamed PhysicsObject)")
 			: GameObject(name), m_x(x), m_y(y), m_width(width), m_height(height), m_bodyType(bodyType), m_textureID(textureID) { }
 
 		virtual void onCreate();

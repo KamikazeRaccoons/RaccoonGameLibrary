@@ -31,7 +31,7 @@ namespace rgl
 	void PhysicsObject::draw()
 	{
 		TextureManager::get()->draw(m_textureID, m_pLevel->toLevelPositionX(m_x), m_pLevel->toLevelPositionY(m_y), m_width, m_height,
-			MathHelper::toDeg(m_pBody->GetAngle()));
+			255, MathHelper::toDeg(m_pBody->GetAngle()));
 	}
 
 	int PhysicsObject::getX()

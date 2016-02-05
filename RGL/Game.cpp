@@ -7,6 +7,8 @@
 #include "Button.h"
 #include "PhysicsObject.h"
 
+#include <chrono>
+
 namespace rgl
 {
 	Game* Game::m_pInstance = 0;
@@ -64,8 +66,10 @@ namespace rgl
 		if (m_running)
 			return false;
 
-		m_useDebugging = useDebugging;
+		srand((unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
+		m_useDebugging = useDebugging;
+		
 		Debugger::get()->init(title);
 
 		if (pInitState == 0 ||

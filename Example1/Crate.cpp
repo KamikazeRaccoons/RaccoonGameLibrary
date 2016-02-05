@@ -2,6 +2,9 @@
 
 void Crate::onCreate()
 {
+	m_leafEmitter = rgl::Emitter(m_pLevel, "Leaf", 16, 16, 1.0f, 3.0f, 45.0f, 135.0f, 4.0f, 1, 3, 20, 40, rgl::Vector2(0.0f, 0.1f));
+	m_poofEmitter = rgl::Emitter(m_pLevel, "Poof", 16, 16, 0.5, 2.0, 180.0f, 360.0f, 4.0f, 1, 2, 10, 20, rgl::Vector2());
+
 	rgl::PhysicsObject::onCreate();
 
 	b2PolygonShape shape;
@@ -19,8 +22,6 @@ void Crate::update()
 {
 	rgl::PhysicsObject::update();
 
-	std::shared_ptr<rgl::Vector2> pMousePos = rgl::InputHandler::get()->getMousePosition();
-
 	int levelMousePosX = (int)m_pLevel->getLevelMousePosition().getX();
 	int levelMousePosY = (int)m_pLevel->getLevelMousePosition().getY();
 
@@ -37,26 +38,18 @@ void Crate::update()
 void Crate::draw()
 {
 	rgl::PhysicsObject::draw();
-
-	if (m_colliding)
-	{
-		SDL_SetRenderDrawColor(rgl::Game::get()->getRenderer(), 255, 0, 0, 255);
-		SDL_Rect collisionRect;
-		collisionRect.x = m_pLevel->toLevelPositionX(m_pLevel->toPixelUnits((float)m_contactPosition.getX())) - 4;
-		collisionRect.y = m_pLevel->toLevelPositionY(m_pLevel->toPixelUnits((float)m_contactPosition.getY())) - 4;
-		collisionRect.w = 8;
-		collisionRect.h = 8;
-		SDL_RenderFillRect(rgl::Game::get()->getRenderer(), &collisionRect);
-	}
 }
 
 void Crate::onBeginContact(rgl::Vector2 contactPosition, rgl::PhysicsObject* pPhysicsObject)
 {
-	m_colliding = true;
-	m_contactPosition = contactPosition;
-}
+	if (m_pBody->GetLinearVelocity().Length() < 4.0f)
+		return;
 
-void Crate::onEndContact(rgl::Vector2 contactPosition, rgl::PhysicsObject* pPhysicsObject)
-{
-	m_colliding = false;
+	int realX = m_pLevel->toPixelUnits((float)contactPosition.getX());
+	int realY = m_pLevel->toPixelUnits((float)contactPosition.getY());
+
+	if (pPhysicsObject == 0)
+		m_leafEmitter.spawn(contactPosition);
+	else
+		m_poofEmitter.spawn(contactPosition);
 }

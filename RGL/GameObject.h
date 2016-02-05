@@ -21,11 +21,11 @@ namespace rgl
 
 		GameObject(std::string name) : m_name(name) { }
 
-		virtual void onCreate() = 0;
-		virtual void onDestroy() = 0;
+		virtual void onCreate() { };
+		virtual void onDestroy() { };
 
-		virtual void update() = 0;
-		virtual void draw() = 0;
+		virtual void update() { };
+		virtual void draw() { };
 
 		virtual int getX() = 0;
 		virtual int getY() = 0;
