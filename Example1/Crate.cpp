@@ -10,6 +10,8 @@ void Crate::onCreate()
 	b2PolygonShape shape;
 	shape.SetAsBox(m_pLevel->toTileUnits(m_width) * 0.5f, m_pLevel->toTileUnits(m_height) * 0.5f);
 
+	b2CircleShape shape2;
+
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &shape;
 	fixtureDef.density = 1.0f;

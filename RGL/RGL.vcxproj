@@ -70,12 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.1\include;C:\SDL2\SDL2_mixer-2.0.1\include;C:\SDL2\SDL2_ttf-2.0.13\include;C:\Box2D-2.3.1\Box2D;C:\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Debug;C:\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\RGL_Resources\SDL2\SDL2-2.0.4\include;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\include;C:\RGL_Resources\Box2D-2.3.1\Box2D;C:\RGL_Resources\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\RGL_Resources\SDL2\SDL2-2.0.4\lib\x86;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\RGL_Resources\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Debug;C:\RGL_Resources\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.1\include;C:\SDL2\SDL2_mixer-2.0.1\include;C:\SDL2\SDL2_ttf-2.0.13\include;C:\Box2D-2.3.1\Box2D;C:\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Release;C:\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\RGL_Resources\SDL2\SDL2-2.0.4\include;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\include;C:\RGL_Resources\Box2D-2.3.1\Box2D;C:\RGL_Resources\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\RGL_Resources\SDL2\SDL2-2.0.4\lib\x86;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\RGL_Resources\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Release;C:\RGL_Resources\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,6 +141,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animator.cpp" />
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="ContactListener.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="Vector2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animator.h" />
     <ClInclude Include="base64.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="ContactListener.h" />

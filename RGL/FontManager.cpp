@@ -79,6 +79,7 @@ namespace rgl
 
 	void FontManager::draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA)
 	{
-		draw(m_fonts.begin()->first, text, x, y, fgR, fgG, fgB, fgA, bgR, bgG, bgB, bgA);
+		if (m_fonts.size() > 0)
+			draw(m_fonts.begin()->first, text, x, y, fgR, fgG, fgB, fgA, bgR, bgG, bgB, bgA);
 	}
 }

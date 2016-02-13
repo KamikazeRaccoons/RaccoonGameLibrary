@@ -2,6 +2,7 @@
 
 // Includes all RGL headers.
 
+#include "Animator.h"
 #include "base64.h"
 #include "Button.h"
 #include "DebugDraw.h"

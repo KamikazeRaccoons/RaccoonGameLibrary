@@ -85,16 +85,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\RaccoonGameLibrary\RGL;C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.1\include;C:\SDL2\SDL2_mixer-2.0.1\include;C:\SDL2\SDL2_ttf-2.0.13\include;C:\Box2D-2.3.1\Box2D;C:\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\RaccoonGameLibrary\Debug;C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Debug;C:\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\RaccoonGameLibrary\RGL;C:\RGL_Resources\SDL2\SDL2-2.0.4\include;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\include;C:\RGL_Resources\Box2D-2.3.1\Box2D;C:\RGL_Resources\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\RaccoonGameLibrary\Debug;C:\RGL_Resources\SDL2\SDL2-2.0.4\lib\x86;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\RGL_Resources\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Debug;C:\RGL_Resources\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\RaccoonGameLibrary\RGL;C:\SDL2\SDL2-2.0.4\include;C:\SDL2\SDL2_image-2.0.1\include;C:\SDL2\SDL2_mixer-2.0.1\include;C:\SDL2\SDL2_ttf-2.0.13\include;C:\Box2D-2.3.1\Box2D;C:\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\RaccoonGameLibrary\Release;C:\SDL2\SDL2-2.0.4\lib\x86;C:\SDL2\SDL2_image-2.0.1\lib\x86;C:\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Release;C:\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\RaccoonGameLibrary\RGL;C:\RGL_Resources\SDL2\SDL2-2.0.4\include;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\include;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\include;C:\RGL_Resources\Box2D-2.3.1\Box2D;C:\RGL_Resources\zlib1.2.8-dll\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\RaccoonGameLibrary\Release;C:\RGL_Resources\SDL2\SDL2-2.0.4\lib\x86;C:\RGL_Resources\SDL2\SDL2_image-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_mixer-2.0.1\lib\x86;C:\RGL_Resources\SDL2\SDL2_ttf-2.0.13\lib\x86;C:\RGL_Resources\Box2D-2.3.1\Box2D\Build\vs2013\bin\x32\Release;C:\RGL_Resources\zlib1.2.8-dll\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
