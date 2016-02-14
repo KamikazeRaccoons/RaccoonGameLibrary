@@ -14,6 +14,7 @@ namespace rgl
 		static void parseTileLayer(tinyxml2::XMLElement* pTileElement, std::shared_ptr<Level> pLevel);
 		static void parseProperties(tinyxml2::XMLElement* pPropertiesRoot, std::shared_ptr<Level> pLevel, std::string path);
 		static void parseObjectLayers(tinyxml2::XMLElement* pObjectGroupRoot, std::shared_ptr<Level> pLevel);
+		static void parseImageLayers(tinyxml2::XMLElement* pImageElement, std::shared_ptr<Level> pLevel);
 
 	public:
 

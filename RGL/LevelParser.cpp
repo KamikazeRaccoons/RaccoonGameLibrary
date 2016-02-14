@@ -1,6 +1,7 @@
 #include "LevelParser.h"
 #include "Debugger.h"
 #include "ObjectLayer.h"
+#include "ImageLayer.h"
 #include "ObjectFactory.h"
 #include "base64.h"
 
@@ -147,6 +148,48 @@ namespace rgl
 		}
 	}
 
+	void LevelParser::parseImageLayers(tinyxml2::XMLElement* pImageElement, std::shared_ptr<Level> pLevel)
+	{
+		int x = 0;
+		int y = 0;
+		int width = 0;
+		int height = 0;
+
+		std::string imageSource;
+		std::string textureID;
+
+		for (const tinyxml2::XMLAttribute* a = pImageElement->FirstAttribute(); a != 0; a = a->Next())
+		{
+			if (a->Name() == std::string("x"))
+				x = a->IntValue();
+			else if (a->Name() == std::string("y"))
+				y = a->IntValue();
+		}
+
+		for (tinyxml2::XMLElement* e = pImageElement->FirstChildElement(); e != 0; e = e->NextSiblingElement())
+		{
+			if (e->Name() == std::string("properties"))
+			{
+				for (tinyxml2::XMLElement* p = e->FirstChildElement(); p != 0; p = p->NextSiblingElement())
+				{
+					if (p->Name() == std::string("property"))
+					{
+						std::string name = p->Attribute("name");
+
+						if (name == std::string("width"))
+							width = p->IntAttribute("value");
+						else if (name == std::string("height"))
+							height = p->IntAttribute("value");
+						else if (name == std::string("textureID"))
+							textureID = p->Attribute("value");
+					}
+				}
+			}
+		}
+
+		pLevel->addLayer(std::make_shared<ImageLayer>(x, y, width, height, textureID, pLevel));
+	}
+
 	std::shared_ptr<Level> LevelParser::parseLevel(std::string path, std::string file)
 	{
 		tinyxml2::XMLDocument xmlDoc;
@@ -166,6 +209,8 @@ namespace rgl
 				parseTileLayer(e, pLevel);
 			else if (e->Value() == std::string("objectgroup"))
 				parseObjectLayers(e, pLevel);
+			else if (e->Value() == std::string("imagelayer"))
+				parseImageLayers(e, pLevel);
 		}
 
 		return pLevel;

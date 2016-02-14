@@ -3,10 +3,10 @@
 
 namespace rgl
 {
-	std::string FileIO::readFile(std::string)
+	std::string FileIO::readFile(std::string filename)
 	{
 		std::string result;
-		std::ifstream file("assets/scripts/update.py");
+		std::ifstream file(filename);
 
 		if (file.is_open())
 		{
