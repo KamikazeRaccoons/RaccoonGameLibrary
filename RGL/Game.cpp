@@ -61,19 +61,19 @@ namespace rgl
 		return m_height;
 	}
 
-	bool Game::run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState, bool useDebugging, bool fullscreen, double frameRate)
+	bool Game::init(std::string title, int width, int height,
+		bool useDebugging, bool fullscreen, double frameRate)
 	{
-		if (m_running)
+		if (m_initialized || m_running)
 			return false;
 
 		srand((unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
 		m_useDebugging = useDebugging;
-		
+
 		Debugger::get()->init(title);
 
-		if (pInitState == 0 ||
-			SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
+		if (SDL_Init(SDL_INIT_EVERYTHING) < 0 ||
 			(m_pWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
 				fullscreen ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_SHOWN)) == 0 ||
 			(m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == 0)
@@ -87,11 +87,29 @@ namespace rgl
 		m_width = width;
 		m_height = height;
 		m_deltaTime = 1.0 / frameRate;
-		m_running = true;
 
 		ObjectFactory::get()->registerType("Button", std::make_shared<ButtonCreator>());
 
 		m_pGameStateMachine = std::make_shared<GameStateMachine>();
+
+		m_initialized = true;
+
+		return true;
+	}
+
+	void Game::run(std::shared_ptr<GameState> pInitState)
+	{
+		if (!m_initialized || m_running)
+			return;
+
+		if (pInitState == 0)
+		{
+			rgl::Debugger::get()->log("Supplied state was null.", rgl::Debugger::MESSAGE);
+			return;
+		}
+
+		m_running = true;
+
 		m_pGameStateMachine->changeState(pInitState);
 
 		double updateTime = SDL_GetTicks() * 0.001;
@@ -115,8 +133,6 @@ namespace rgl
 		}
 
 		clean();
-
-		return true;
 	}
 
 	void Game::quit()

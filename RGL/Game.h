@@ -19,6 +19,7 @@ namespace rgl
 		SDL_Renderer* m_pRenderer;
 
 		bool m_useDebugging;
+		bool m_initialized;
 		bool m_running;
 
 		double m_deltaTime;
@@ -28,7 +29,7 @@ namespace rgl
 
 		std::shared_ptr<GameStateMachine> m_pGameStateMachine;
 
-		Game() : m_running(false) { }
+		Game() : m_initialized(false), m_running(false) { }
 		~Game() { }
 
 		void pollEvents();
@@ -53,8 +54,10 @@ namespace rgl
 
 		std::shared_ptr<GameStateMachine> getGameStateMachine();
 
-		bool run(std::string title, int width, int height, std::shared_ptr<GameState> pInitState,
+		bool init(std::string title, int width, int height,
 			bool useDebugging = false, bool fullscreen = false, double frameRate = 60.0);
+
+		void run(std::shared_ptr<GameState> pInitState);
 
 		void quit();
 
