@@ -4,6 +4,7 @@
 #include "TextureManager.h"
 #include "InputHandler.h"
 #include "Debugger.h"
+#include "TileLayer.h"
 
 namespace rgl
 {
@@ -224,5 +225,18 @@ namespace rgl
 	Vector2 Level::getLevelMousePosition()
 	{
 		return *InputHandler::get()->getMousePosition().get() + m_position;
+	}
+
+	bool Level::isTileAt(int x, int y)
+	{
+		for (auto layer : m_layers)
+		{
+			std::shared_ptr<TileLayer> tileLayer = std::dynamic_pointer_cast<TileLayer>(layer);
+
+			if (tileLayer && tileLayer->isTileAt(x, y))
+				return true;
+		}
+
+		return false;
 	}
 }

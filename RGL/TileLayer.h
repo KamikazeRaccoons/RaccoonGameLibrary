@@ -23,8 +23,6 @@ namespace rgl
 		b2Body* m_pBody;
 		std::vector<b2Fixture*> m_fixtures;
 
-		bool checkTileAt(int x, int y);
-
 	public:
 
 		TileLayer(std::shared_ptr<Level> pLevel);
@@ -36,6 +34,8 @@ namespace rgl
 		void setTileIDs(const std::vector<std::vector<int>>& data);
 		void setTileSize(int tileSize);
 		void generateFixtures();
+
+		bool isTileAt(int x, int y);
 
 	};
 }

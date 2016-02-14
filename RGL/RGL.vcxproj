@@ -148,6 +148,7 @@
     <ClCompile Include="DebugDraw.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Emitter.cpp" />
+    <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="DebugDraw.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="Emitter.h" />
+    <ClInclude Include="FileIO.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />

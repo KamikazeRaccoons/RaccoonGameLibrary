@@ -8,6 +8,7 @@
 #include "DebugDraw.h"
 #include "Debugger.h"
 #include "Emitter.h"
+#include "FileIO.h"
 #include "FontManager.h"
 #include "Game.h"
 #include "GameObject.h"

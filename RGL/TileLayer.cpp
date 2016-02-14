@@ -80,28 +80,28 @@ namespace rgl
 				if (m_tileIDs[y][x] == 0)
 					continue;
 
-				if (!checkTileAt(x - 1, y))
+				if (!isTileAt(x - 1, y))
 				{
 					b2EdgeShape edgeShape;
 					edgeShape.Set(b2Vec2((float)x, (float)y), b2Vec2((float)x, (float)(y + 1)));
 					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
 				}
 
-				if (!checkTileAt(x, y - 1))
+				if (!isTileAt(x, y - 1))
 				{
 					b2EdgeShape edgeShape;
 					edgeShape.Set(b2Vec2((float)x, (float)y), b2Vec2((float)(x + 1), (float)y));
 					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
 				}
 
-				if (!checkTileAt(x + 1, y))
+				if (!isTileAt(x + 1, y))
 				{
 					b2EdgeShape edgeShape;
 					edgeShape.Set(b2Vec2((float)(x + 1), (float)y), b2Vec2((float)(x + 1), (float)(y + 1)));
 					m_fixtures.push_back(m_pBody->CreateFixture(&edgeShape, 0.0f));
 				}
 
-				if (!checkTileAt(x, y + 1))
+				if (!isTileAt(x, y + 1))
 				{
 					b2EdgeShape edgeShape;
 					edgeShape.Set(b2Vec2((float)x, (float)(y + 1)), b2Vec2((float)(x + 1), (float)(y + 1)));
@@ -111,7 +111,7 @@ namespace rgl
 		}
 	}
 
-	bool TileLayer::checkTileAt(int x, int y)
+	bool TileLayer::isTileAt(int x, int y)
 	{
 		return (y < 0 || x < 0 || y >= (int)m_tileIDs.size() || x >= (int)m_tileIDs[y].size() || m_tileIDs[y][x] == 0) ? false : true;
 	}

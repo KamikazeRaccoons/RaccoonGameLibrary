@@ -1,30 +1,18 @@
 #include "Animator.h"
-#include "Game.h"
 
-void Animator::addAnimation(int frameCount, float speed)
+void Animator::setAnimation(int frameCount, float speed)
 {
-	m_animations.push_back(Animation(frameCount, speed));
-}
-
-void Animator::setAnimation(int id)
-{
-	m_currentID = id;
+	m_frameCount = frameCount;
+	m_speed = speed;
 	m_currentFrame = 0.0f;
 }
 
 void Animator::update()
 {
-	Animation currentAnimation = m_animations[m_currentID];
+	m_currentFrame += m_speed;
 
-	m_currentFrame += currentAnimation.m_speed;
-
-	if (m_currentFrame > currentAnimation.m_frameCount)
+	if (m_currentFrame > m_frameCount)
 		m_currentFrame = 0.0f;
-}
-
-int Animator::getCurrentRow()
-{
-	return m_currentID;
 }
 
 int Animator::getCurrentFrame()
