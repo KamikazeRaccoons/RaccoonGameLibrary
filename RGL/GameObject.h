@@ -34,7 +34,9 @@ namespace rgl
 		virtual int getHeight() = 0;
 
 		void setParentLevel(std::shared_ptr<Level> pParentLevel);
+
 		void setName(std::string name);
+		std::string getName();
 
 		int getDiameter();
 

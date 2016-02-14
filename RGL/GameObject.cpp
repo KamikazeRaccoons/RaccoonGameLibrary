@@ -15,6 +15,11 @@ namespace rgl
 		m_name = name;
 	}
 
+	std::string GameObject::getName()
+	{
+		return m_name;
+	}
+
 	int GameObject::getDiameter()
 	{
 		return (int)std::sqrt(getWidth() * getWidth() + getHeight() * getHeight());
