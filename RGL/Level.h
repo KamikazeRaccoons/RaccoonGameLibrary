@@ -99,6 +99,6 @@ namespace rgl
 		Vector2 toLevelPosition(Vector2 globalPosition);
 		Vector2 getLevelMousePosition();
 
-		bool isTileAt(int x, int y);
+		bool isTileAt(int x, int y, bool mustBeInteractive = false);
 	};
 }

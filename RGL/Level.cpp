@@ -227,13 +227,13 @@ namespace rgl
 		return *InputHandler::get()->getMousePosition().get() + m_position;
 	}
 
-	bool Level::isTileAt(int x, int y)
+	bool Level::isTileAt(int x, int y, bool mustBeInteractive)
 	{
 		for (auto layer : m_layers)
 		{
 			std::shared_ptr<TileLayer> tileLayer = std::dynamic_pointer_cast<TileLayer>(layer);
 
-			if (tileLayer && tileLayer->isInteractive() && tileLayer->isTileAt(x, y))
+			if (tileLayer && (!mustBeInteractive || tileLayer->isInteractive()) && tileLayer->isTileAt(x, y))
 				return true;
 		}
 
