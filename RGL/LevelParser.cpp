@@ -195,6 +195,9 @@ namespace rgl
 		tinyxml2::XMLDocument xmlDoc;
 		xmlDoc.LoadFile((path + file).c_str());
 
+		if (xmlDoc.Error())
+			return 0;
+
 		tinyxml2::XMLElement* pRoot = xmlDoc.RootElement();
 
 		std::shared_ptr<Level> pLevel = std::make_shared<Level>(pRoot->IntAttribute("tilewidth"), pRoot->IntAttribute("width"), pRoot->IntAttribute("height"));

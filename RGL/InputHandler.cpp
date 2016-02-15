@@ -1,4 +1,5 @@
 #include "InputHandler.h"
+#include "Debugger.h"
 #include "Game.h"
 
 namespace rgl
@@ -77,11 +78,32 @@ namespace rgl
 		return m_pKeystates[key] == 1 ? true : false;
 	}
 
+	std::string InputHandler::getInputText()
+	{
+		return m_inputText;
+	}
+
+	int InputHandler::getBackspaceCount()
+	{
+		return m_backspaceCount;
+	}
+
+	int InputHandler::getRelativeCursorPosition()
+	{
+		return m_relativeCursorPosition;
+	}
+
 	void InputHandler::update()
 	{
 		m_pKeystates = SDL_GetKeyboardState(0);
 
+		m_inputText.clear();
+		m_backspaceCount = 0;
+		m_relativeCursorPosition = 0;
+
 		SDL_Event event;
+
+		SDL_StartTextInput();
 
 		while (SDL_PollEvent(&event))
 		{
@@ -99,7 +121,35 @@ namespace rgl
 			case SDL_MOUSEMOTION:
 				onMouseMove(event);
 				break;
+			case SDL_TEXTINPUT:
+				m_inputText += event.text.text;
+				break;
+			case SDL_KEYDOWN:
+				switch (event.key.keysym.scancode)
+				{
+				case SDL_SCANCODE_BACKSPACE:
+					if (m_inputText.size() == 0)
+						m_backspaceCount++;
+					else
+						m_inputText.pop_back();
+					break;
+				case SDL_SCANCODE_RETURN:
+					m_inputText += '\n';
+					break;
+				case SDL_SCANCODE_TAB:
+					m_inputText += "    ";
+					break;
+				case SDL_SCANCODE_LEFT:
+					m_relativeCursorPosition++;
+					break;
+				case SDL_SCANCODE_RIGHT:
+					m_relativeCursorPosition--;
+					break;
+				}
+				break;
 			}
 		}
+
+		SDL_StopTextInput();
 	}
 }

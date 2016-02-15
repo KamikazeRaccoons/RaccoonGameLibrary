@@ -26,6 +26,7 @@
 #include "PhysicsObject.h"
 #include "SimpleActor.h"
 #include "SoundManager.h"
+#include "TextBox.h"
 #include "TextureManager.h"
 #include "TileLayer.h"
 #include "tinyxml2.h"

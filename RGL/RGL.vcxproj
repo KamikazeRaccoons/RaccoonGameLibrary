@@ -164,6 +164,7 @@
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="SimpleActor.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="TileLayer.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="RGL.h" />
     <ClInclude Include="SimpleActor.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="TileLayer.h" />
     <ClInclude Include="tinyxml2.h" />

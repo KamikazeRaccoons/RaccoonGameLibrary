@@ -18,6 +18,8 @@ namespace rgl
 		int m_numRows;
 		int m_tileSize;
 
+		bool m_isInteractive;
+
 		std::vector<std::vector<int>> m_tileIDs;
 
 		b2Body* m_pBody;
@@ -35,6 +37,7 @@ namespace rgl
 		void setTileSize(int tileSize);
 		void generateFixtures();
 
+		bool isInteractive();
 		bool isTileAt(int x, int y);
 
 	};

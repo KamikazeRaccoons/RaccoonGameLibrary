@@ -9,7 +9,9 @@ namespace rgl
 	{
 	public:
 
-		static std::string readFile(std::string file);
+		static std::string readFile(std::string filename);
+		static void writeFile(std::string filename, std::string value);
+		static bool fileExists(std::string filename);
 
 	};
 }

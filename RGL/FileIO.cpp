@@ -12,9 +12,12 @@ namespace rgl
 		{
 			while (!file.eof())
 			{
+				if (!result.empty())
+					result += '\n';
+
 				std::string currentLine;
 				std::getline(file, currentLine);
-				result += currentLine + "\n";
+				result += currentLine;
 			}
 		}
 		else
@@ -23,5 +26,18 @@ namespace rgl
 		}
 
 		return result;
+	}
+
+	void FileIO::writeFile(std::string filename, std::string value)
+	{
+		std::ofstream file(filename);
+		file << value;
+		file.close();
+	}
+
+	bool FileIO::fileExists(std::string filename)
+	{
+		std::ifstream file(filename);
+		return file.good();
 	}
 }

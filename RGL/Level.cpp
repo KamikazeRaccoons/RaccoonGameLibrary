@@ -233,7 +233,7 @@ namespace rgl
 		{
 			std::shared_ptr<TileLayer> tileLayer = std::dynamic_pointer_cast<TileLayer>(layer);
 
-			if (tileLayer && tileLayer->isTileAt(x, y))
+			if (tileLayer && tileLayer->isInteractive() && tileLayer->isTileAt(x, y))
 				return true;
 		}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include <memory>
 
@@ -20,6 +21,10 @@ namespace rgl
 		std::shared_ptr<Vector2> m_pMousePosition;
 
 		const Uint8* m_pKeystates;
+
+		std::string m_inputText;
+		int m_backspaceCount;
+		int m_relativeCursorPosition;
 
 		InputHandler();
 		~InputHandler() { }
@@ -43,6 +48,10 @@ namespace rgl
 		std::shared_ptr<Vector2> getMousePosition();
 
 		bool isKeyDown(SDL_Scancode key);
+
+		std::string getInputText();
+		int getBackspaceCount();
+		int getRelativeCursorPosition();
 
 		void update();
 

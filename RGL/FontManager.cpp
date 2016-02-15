@@ -25,9 +25,16 @@ namespace rgl
 		TTF_Font* pFont = TTF_OpenFont(file.c_str(), ptsize);
 
 		if (pFont == 0)
+		{
 			Debugger::get()->log("Could not load font file \"" + file + "\"", Debugger::WARNING);
+		}
 		else
+		{
+			if (m_fonts.size() == 0)
+				m_defaultFont = name;
+
 			m_fonts[name] = TTF_OpenFont(file.c_str(), ptsize);
+		}
 	}
 
 	void FontManager::unload(std::string name)
@@ -43,15 +50,21 @@ namespace rgl
 		m_fonts.clear();
 	}
 
-	void FontManager::draw(std::string name, std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA)
+	void FontManager::draw(std::string name, std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA, int* width, int* height)
 	{
+		if (text.empty() || m_fonts.find(name) == m_fonts.end())
+			return;
+
 		SDL_Color fgColor;
 		fgColor.r = fgR;
 		fgColor.g = fgG;
 		fgColor.b = fgB;
 
-		SDL_Surface* pTextSurface = TTF_RenderText_Solid(m_fonts[name], text.c_str(), fgColor);
+		SDL_Surface* pTextSurface = TTF_RenderText_Blended_Wrapped(m_fonts[name], text.c_str(), fgColor, Game::get()->getWidth());
+
 		SDL_Texture* pTextTexture = SDL_CreateTextureFromSurface(Game::get()->getRenderer(), pTextSurface);
+
+		SDL_QueryTexture(pTextTexture, NULL, NULL, width, height);
 
 		SDL_SetTextureAlphaMod(pTextTexture, fgA);
 
@@ -77,9 +90,19 @@ namespace rgl
 		SDL_DestroyTexture(pTextTexture);
 	}
 
-	void FontManager::draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA)
+	void FontManager::draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA, int* width, int* height)
 	{
 		if (m_fonts.size() > 0)
-			draw(m_fonts.begin()->first, text, x, y, fgR, fgG, fgB, fgA, bgR, bgG, bgB, bgA);
+			draw(m_defaultFont, text, x, y, fgR, fgG, fgB, fgA, bgR, bgG, bgB, bgA, width, height);
+	}
+
+	Vector2 FontManager::getCharacterSize(std::string name)
+	{
+		int width;
+		int height;
+
+		TTF_SizeText(m_fonts[name], "a", &width, &height);
+
+		return Vector2((double)width, (double)height);
 	}
 }

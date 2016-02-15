@@ -7,7 +7,7 @@
 namespace rgl
 {
 	TileLayer::TileLayer(std::shared_ptr<Level> pLevel)
-		: Layer(pLevel), m_tileSize(pLevel->getTileSize())
+		: Layer(pLevel), m_tileSize(pLevel->getTileSize()), m_isInteractive(false)
 	{
 		m_numColumns = (int)std::ceil((float)Game::get()->getWidth() / (float)m_tileSize) + 1;
 		m_numRows = (int)std::ceil((float)Game::get()->getHeight() / (float)m_tileSize) + 1;
@@ -109,6 +109,13 @@ namespace rgl
 				}
 			}
 		}
+
+		m_isInteractive = true;
+	}
+
+	bool TileLayer::isInteractive()
+	{
+		return m_isInteractive;
 	}
 
 	bool TileLayer::isTileAt(int x, int y)
