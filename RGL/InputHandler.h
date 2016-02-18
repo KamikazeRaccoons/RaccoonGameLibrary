@@ -23,8 +23,8 @@ namespace rgl
 		const Uint8* m_pKeystates;
 
 		std::string m_inputText;
-		int m_backspaceCount;
-		int m_relativeCursorPosition;
+
+		std::vector<SDL_Scancode> m_polledKeydowns;
 
 		InputHandler();
 		~InputHandler() { }
@@ -50,8 +50,8 @@ namespace rgl
 		bool isKeyDown(SDL_Scancode key);
 
 		std::string getInputText();
-		int getBackspaceCount();
-		int getRelativeCursorPosition();
+
+		std::vector<SDL_Scancode> getPolledKeydowns();
 
 		void update();
 

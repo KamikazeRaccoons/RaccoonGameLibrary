@@ -83,14 +83,9 @@ namespace rgl
 		return m_inputText;
 	}
 
-	int InputHandler::getBackspaceCount()
+	std::vector<SDL_Scancode> InputHandler::getPolledKeydowns()
 	{
-		return m_backspaceCount;
-	}
-
-	int InputHandler::getRelativeCursorPosition()
-	{
-		return m_relativeCursorPosition;
+		return m_polledKeydowns;
 	}
 
 	void InputHandler::update()
@@ -98,8 +93,7 @@ namespace rgl
 		m_pKeystates = SDL_GetKeyboardState(0);
 
 		m_inputText.clear();
-		m_backspaceCount = 0;
-		m_relativeCursorPosition = 0;
+		m_polledKeydowns.clear();
 
 		SDL_Event event;
 
@@ -125,27 +119,7 @@ namespace rgl
 				m_inputText += event.text.text;
 				break;
 			case SDL_KEYDOWN:
-				switch (event.key.keysym.scancode)
-				{
-				case SDL_SCANCODE_BACKSPACE:
-					if (m_inputText.size() == 0)
-						m_backspaceCount++;
-					else
-						m_inputText.pop_back();
-					break;
-				case SDL_SCANCODE_RETURN:
-					m_inputText += '\n';
-					break;
-				case SDL_SCANCODE_TAB:
-					m_inputText += "    ";
-					break;
-				case SDL_SCANCODE_LEFT:
-					m_relativeCursorPosition++;
-					break;
-				case SDL_SCANCODE_RIGHT:
-					m_relativeCursorPosition--;
-					break;
-				}
+				m_polledKeydowns.push_back(event.key.keysym.scancode);
 				break;
 			}
 		}

@@ -2,11 +2,13 @@
 
 #include "GameObject.h"
 
+#include <vector>
+
 namespace rgl
 {
 	class TextBox : public GameObject
 	{
-	private:
+	protected:
 
 		bool m_enabled;
 
@@ -16,20 +18,39 @@ namespace rgl
 		int m_width;
 		int m_height;
 
-		int m_r;
-		int m_g;
-		int m_b;
-		int m_a;
+		int m_fr;
+		int m_fg;
+		int m_fb;
+		int m_fa;
+
+		int m_br;
+		int m_bg;
+		int m_bb;
+		int m_ba;
 
 		std::string m_fontID;
 		std::string m_text;
 
-		int m_cursorPosition;
+		int m_cursorWidth;
+
+		int m_currentRow;
+		int m_currentColumn;
+
+		int m_charWidth;
+		int m_charHeight;
+
+		std::vector<int> getNewlineIndices();
+
+		int getNumRows();
+		int getRowLength(int row);
+		int getCursorIndex();
 
 	public:
 
-		TextBox(bool enabled, int x, int y, int width, int height, int r, int g, int b, int a, std::string fontID, std::string name = "(unnamed TextBox)")
-			: GameObject(name), m_enabled(enabled), m_x(x), m_y(y), m_width(width), m_height(height), m_r(r), m_g(g), m_b(b), m_a(a), m_fontID(fontID), m_cursorPosition(0) { }
+		TextBox(bool enabled, int x, int y, int width, int height, int cursorWidth,
+			int fr, int fg, int fb, int fa,
+			int br, int bg, int bb, int ba,
+			std::string fontID, std::string name = "(unnamed TextBox)");
 
 		virtual void onCreate();
 		virtual void onDestroy();

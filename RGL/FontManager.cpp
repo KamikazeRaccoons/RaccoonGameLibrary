@@ -101,7 +101,7 @@ namespace rgl
 		int width;
 		int height;
 
-		TTF_SizeText(m_fonts[name], "a", &width, &height);
+		TTF_SizeText(m_fonts[name], " ", &width, &height);
 
 		return Vector2((double)width, (double)height);
 	}
