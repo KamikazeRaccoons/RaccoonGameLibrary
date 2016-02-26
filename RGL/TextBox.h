@@ -33,17 +33,36 @@ namespace rgl
 
 		int m_cursorWidth;
 
-		int m_currentRow;
-		int m_currentColumn;
+		int m_primaryRow;
+		int m_primaryColumn;
+		
+		int m_secondaryRow;
+		int m_secondaryColumn;
 
 		int m_charWidth;
 		int m_charHeight;
+
+		void onDownPressed();
+		void onUpPressed();
+		void onRightPressed();
+		void onLeftPressed();
+		void onDeletePressed();
+		void onBackspacePressed();
+		void onReturnPressed();
+		void onTabPressed();
 
 		std::vector<int> getNewlineIndices();
 
 		int getNumRows();
 		int getRowLength(int row);
-		int getCursorIndex();
+		int getCursorIndex(int row, int column);
+
+		void resetPrimaryCursor();
+		void resetSecondaryCursor();
+
+		void clearSelection();
+
+		bool isSelecting();
 
 	public:
 

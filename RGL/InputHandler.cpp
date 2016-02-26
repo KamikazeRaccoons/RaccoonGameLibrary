@@ -36,6 +36,8 @@ namespace rgl
 			m_mouseButtonStates[RIGHT] = true;
 			break;
 		}
+
+		m_polledButtonPresses.push_back(event.button.button);
 	}
 
 	void InputHandler::onMouseButtonUp(SDL_Event& event)
@@ -58,6 +60,16 @@ namespace rgl
 	{
 		m_pMousePosition->setX(event.motion.x);
 		m_pMousePosition->setY(event.motion.y);
+	}
+
+	void InputHandler::onKeyDown(SDL_Event& event)
+	{
+		m_polledKeydowns.push_back(event.key.keysym.scancode);
+	}
+
+	void InputHandler::onTextInput(SDL_Event& event)
+	{
+		m_inputText += event.text.text;
 	}
 
 	bool InputHandler::getMouseButtonState(int buttonID)
@@ -88,12 +100,18 @@ namespace rgl
 		return m_polledKeydowns;
 	}
 
+	std::vector<Uint8> InputHandler::getPolledButtonPresses()
+	{
+		return m_polledButtonPresses;
+	}
+
 	void InputHandler::update()
 	{
 		m_pKeystates = SDL_GetKeyboardState(0);
 
 		m_inputText.clear();
 		m_polledKeydowns.clear();
+		m_polledButtonPresses.clear();
 
 		SDL_Event event;
 
@@ -115,11 +133,11 @@ namespace rgl
 			case SDL_MOUSEMOTION:
 				onMouseMove(event);
 				break;
-			case SDL_TEXTINPUT:
-				m_inputText += event.text.text;
-				break;
 			case SDL_KEYDOWN:
-				m_polledKeydowns.push_back(event.key.keysym.scancode);
+				onKeyDown(event);
+				break;
+			case SDL_TEXTINPUT:
+				onTextInput(event);
 				break;
 			}
 		}

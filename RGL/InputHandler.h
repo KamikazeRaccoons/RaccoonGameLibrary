@@ -25,6 +25,7 @@ namespace rgl
 		std::string m_inputText;
 
 		std::vector<SDL_Scancode> m_polledKeydowns;
+		std::vector<Uint8> m_polledButtonPresses;
 
 		InputHandler();
 		~InputHandler() { }
@@ -32,6 +33,8 @@ namespace rgl
 		void onMouseButtonDown(SDL_Event& event);
 		void onMouseButtonUp(SDL_Event& event);
 		void onMouseMove(SDL_Event& event);
+		void onKeyDown(SDL_Event& event);
+		void onTextInput(SDL_Event& event);
 
 	public:
 
@@ -52,6 +55,7 @@ namespace rgl
 		std::string getInputText();
 
 		std::vector<SDL_Scancode> getPolledKeydowns();
+		std::vector<Uint8> getPolledButtonPresses();
 
 		void update();
 
