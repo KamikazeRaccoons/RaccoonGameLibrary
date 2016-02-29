@@ -10,6 +10,18 @@ namespace rgl
 	{
 	protected:
 
+		struct Cursor
+		{
+			int row;
+			int column;
+
+			bool operator==(Cursor cursor) { return row == cursor.row && column == cursor.column; }
+			bool operator!=(Cursor cursor) { return !(*this == cursor); }
+		};
+
+		Cursor m_primaryCursor;
+		Cursor m_secondaryCursor;
+
 		bool m_enabled;
 
 		int m_x;
@@ -33,12 +45,6 @@ namespace rgl
 
 		int m_cursorWidth;
 
-		int m_primaryRow;
-		int m_primaryColumn;
-		
-		int m_secondaryRow;
-		int m_secondaryColumn;
-
 		int m_charWidth;
 		int m_charHeight;
 
@@ -55,10 +61,7 @@ namespace rgl
 
 		int getNumRows();
 		int getRowLength(int row);
-		int getCursorIndex(int row, int column);
-
-		void resetPrimaryCursor();
-		void resetSecondaryCursor();
+		int getCursorIndex(Cursor &cursor);
 
 		void clearSelection();
 

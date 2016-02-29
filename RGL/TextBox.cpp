@@ -15,7 +15,7 @@ namespace rgl
 		: GameObject(name), m_enabled(enabled), m_x(x), m_y(y), m_width(width), m_height(height), m_cursorWidth(cursorWidth),
 		m_fr(fr), m_fg(fg), m_fb(fb), m_fa(fa),
 		m_br(br), m_bg(bg), m_bb(bb), m_ba(ba),
-		m_fontID(fontID), m_primaryRow(0), m_primaryColumn(0), m_secondaryRow(0), m_secondaryColumn(0)
+		m_fontID(fontID)
 	{
 		Vector2 charSize = FontManager::get()->getCharacterSize(fontID);
 		m_charWidth = (int)charSize.getX();
@@ -46,15 +46,15 @@ namespace rgl
 				pMousePos->getY() >= m_y)
 			{
 				int numRows = getNumRows();
-				m_primaryRow = max(min(((int)pMousePos->getY() - m_y) / m_charHeight, numRows - 1), 0);
+				m_primaryCursor.row = max(min(((int)pMousePos->getY() - m_y) / m_charHeight, numRows - 1), 0);
 
-				int rowLength = getRowLength(m_primaryRow);
-				m_primaryColumn = max(min((int)std::round((pMousePos->getX() - (double)m_x) / (double)m_charWidth), rowLength), 0);
+				int rowLength = getRowLength(m_primaryCursor.row);
+				m_primaryCursor.column = max(min((int)std::round((pMousePos->getX() - (double)m_x) / (double)m_charWidth), rowLength), 0);
 
 				std::vector<Uint8> polledButtonPresses = InputHandler::get()->getPolledButtonPresses();
 
 				if (std::find(polledButtonPresses.begin(), polledButtonPresses.end(), SDL_BUTTON_LEFT) != polledButtonPresses.end())
-					resetSecondaryCursor();
+					m_secondaryCursor = m_primaryCursor;
 			}
 		}
 
@@ -98,10 +98,10 @@ namespace rgl
 			if (isSelecting())
 				clearSelection();
 
-			m_text.insert(getCursorIndex(m_primaryRow, m_primaryColumn), inputText);
-			m_primaryColumn += inputText.size();
+			m_text.insert(getCursorIndex(m_primaryCursor), inputText);
+			m_primaryCursor.column += inputText.size();
 
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 		}
 	}
 
@@ -120,63 +120,55 @@ namespace rgl
 		{
 			if (isSelecting())
 			{
-				int upperRow;
-				int upperColumn;
-				int lowerRow;
-				int lowerColumn;
+				Cursor* pUpperCursor;
+				Cursor* pLowerCursor;
 
-				if (getCursorIndex(m_primaryRow, m_primaryColumn) < getCursorIndex(m_secondaryRow, m_secondaryColumn))
+				if (getCursorIndex(m_primaryCursor) < getCursorIndex(m_secondaryCursor))
 				{
-					upperRow = m_primaryRow;
-					upperColumn = m_primaryColumn;
-					lowerRow = m_secondaryRow;
-					lowerColumn = m_secondaryColumn;
+					pUpperCursor = &m_primaryCursor;
+					pLowerCursor = &m_secondaryCursor;
 				}
 				else
 				{
-					upperRow = m_secondaryRow;
-					upperColumn = m_secondaryColumn;
-					lowerRow = m_primaryRow;
-					lowerColumn = m_primaryColumn;
+					pUpperCursor = &m_secondaryCursor;
+					pLowerCursor = &m_primaryCursor;
 				}
 
-				SDL_SetRenderDrawColor(Game::get()->getRenderer(), 0, 0, 255, 127);
+				SDL_SetRenderDrawColor(Game::get()->getRenderer(), 0, 95, 255, 127);
 
-				for (int i = lowerRow; i >= upperRow && i >= 0; i--)
+				for (int i = pLowerCursor->row; i >= pUpperCursor->row; i--)
 				{
 					int currentRowLength = getRowLength(i);
 
 					SDL_Rect fillRect;
 					fillRect.x = m_x;
 					fillRect.y = m_y + i * m_charHeight;
-					fillRect.w = currentRowLength * m_charWidth;
+					fillRect.w = max(currentRowLength * m_charWidth, m_cursorWidth * 2);
 					fillRect.h = m_charHeight;
 
-					if (i == upperRow)
+					if (i == pUpperCursor->row)
 					{
-						int offset = upperColumn * m_charWidth;
+						int offset = pUpperCursor->column * m_charWidth;
 
 						fillRect.x += offset;
 						fillRect.w -= offset;
 					}
 
-					if (i == lowerRow)
-						fillRect.w -= (currentRowLength - lowerColumn) * m_charWidth;
+					if (i == pLowerCursor->row)
+						fillRect.w -= (currentRowLength - pLowerCursor->column) * m_charWidth;
 
 					SDL_RenderFillRect(Game::get()->getRenderer(), &fillRect);
 				}
 			}
-			else
-			{
-				SDL_Rect primaryCursorRect;
-				primaryCursorRect.x = m_x + m_primaryColumn * m_charWidth;
-				primaryCursorRect.y = m_y + m_primaryRow * m_charHeight;
-				primaryCursorRect.w = m_cursorWidth;
-				primaryCursorRect.h = m_charHeight;
 
-				SDL_SetRenderDrawColor(Game::get()->getRenderer(), 0, 0, 0, 255);
-				SDL_RenderFillRect(Game::get()->getRenderer(), &primaryCursorRect);
-			}
+			SDL_Rect primaryCursorRect;
+			primaryCursorRect.x = m_x + m_primaryCursor.column * m_charWidth;
+			primaryCursorRect.y = m_y + m_primaryCursor.row * m_charHeight;
+			primaryCursorRect.w = m_cursorWidth;
+			primaryCursorRect.h = m_charHeight;
+
+			SDL_SetRenderDrawColor(Game::get()->getRenderer(), 0, 0, 0, 255);
+			SDL_RenderFillRect(Game::get()->getRenderer(), &primaryCursorRect);
 		}
 
 		FontManager::get()->draw(m_fontID, m_text, m_x, m_y, m_fr, m_fg, m_fb, m_fa, 0, 0, 0, 0);
@@ -184,57 +176,57 @@ namespace rgl
 
 	void TextBox::onDownPressed()
 	{
-		if (m_primaryRow < getNumRows() - 1)
+		if (m_primaryCursor.row < getNumRows() - 1)
 		{
-			int rowLength = getRowLength(++m_primaryRow);
+			int rowLength = getRowLength(++m_primaryCursor.row);
 
-			if (m_primaryColumn > rowLength)
-				m_primaryColumn = rowLength;
+			if (m_primaryCursor.column > rowLength)
+				m_primaryCursor.column = rowLength;
 		}
 
 		if (!InputHandler::get()->isKeyDown(SDL_SCANCODE_LSHIFT) && !InputHandler::get()->isKeyDown(SDL_SCANCODE_RSHIFT))
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::onUpPressed()
 	{
-		if (m_primaryRow > 0)
+		if (m_primaryCursor.row > 0)
 		{
-			int rowLength = getRowLength(--m_primaryRow);
+			int rowLength = getRowLength(--m_primaryCursor.row);
 
-			if (m_primaryColumn > rowLength)
-				m_primaryColumn = rowLength;
+			if (m_primaryCursor.column > rowLength)
+				m_primaryCursor.column = rowLength;
 		}
 
 		if (!InputHandler::get()->isKeyDown(SDL_SCANCODE_LSHIFT) && !InputHandler::get()->isKeyDown(SDL_SCANCODE_RSHIFT))
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::onRightPressed()
 	{
-		if (m_primaryColumn < getRowLength(m_primaryRow))
+		if (m_primaryCursor.column < getRowLength(m_primaryCursor.row))
 		{
-			m_primaryColumn++;
+			m_primaryCursor.column++;
 		}
-		else if (m_primaryRow < getNumRows() - 1)
+		else if (m_primaryCursor.row < getNumRows() - 1)
 		{
-			m_primaryColumn = 0;
-			m_primaryRow++;
+			m_primaryCursor.column = 0;
+			m_primaryCursor.row++;
 		}
 
 		if (!InputHandler::get()->isKeyDown(SDL_SCANCODE_LSHIFT) && !InputHandler::get()->isKeyDown(SDL_SCANCODE_RSHIFT))
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::onLeftPressed()
 	{
-		if (m_primaryColumn > 0)
-			m_primaryColumn--;
-		else if (m_primaryRow > 0)
-			m_primaryColumn = getRowLength(--m_primaryRow);
+		if (m_primaryCursor.column > 0)
+			m_primaryCursor.column--;
+		else if (m_primaryCursor.row > 0)
+			m_primaryCursor.column = getRowLength(--m_primaryCursor.row);
 
 		if (!InputHandler::get()->isKeyDown(SDL_SCANCODE_LSHIFT) && !InputHandler::get()->isKeyDown(SDL_SCANCODE_RSHIFT))
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::onDeletePressed()
@@ -245,7 +237,7 @@ namespace rgl
 		}
 		else
 		{
-			int primaryCursorIndex = getCursorIndex(m_primaryRow, m_primaryColumn);
+			int primaryCursorIndex = getCursorIndex(m_primaryCursor);
 
 			if (primaryCursorIndex < (int)m_text.size())
 				m_text.erase(m_text.begin() + primaryCursorIndex);
@@ -260,19 +252,19 @@ namespace rgl
 		}
 		else
 		{
-			if (m_primaryColumn > 0)
-				m_primaryColumn--;
-			else if (m_primaryRow > 0)
-				m_primaryColumn = getRowLength(--m_primaryRow);
+			if (m_primaryCursor.column > 0)
+				m_primaryCursor.column--;
+			else if (m_primaryCursor.row > 0)
+				m_primaryCursor.column = getRowLength(--m_primaryCursor.row);
 			else
 				return;
 
-			int primaryCursorIndex = getCursorIndex(m_primaryRow, m_primaryColumn);
+			int primaryCursorIndex = getCursorIndex(m_primaryCursor);
 
 			if (primaryCursorIndex < (int)m_text.size())
 				m_text.erase(m_text.begin() + primaryCursorIndex);
 
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 		}
 	}
 
@@ -281,11 +273,11 @@ namespace rgl
 		if (isSelecting())
 			clearSelection();
 
-		m_text.insert(getCursorIndex(m_primaryRow, m_primaryColumn), "\n");
-		m_primaryColumn = 0;
-		m_primaryRow++;
+		m_text.insert(getCursorIndex(m_primaryCursor), "\n");
+		m_primaryCursor.column = 0;
+		m_primaryCursor.row++;
 
-		resetSecondaryCursor();
+		m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::onTabPressed()
@@ -293,10 +285,10 @@ namespace rgl
 		if (isSelecting())
 			clearSelection();
 
-		m_text.insert(getCursorIndex(m_primaryRow, m_primaryColumn), "    ");
-		m_primaryColumn += 4;
+		m_text.insert(getCursorIndex(m_primaryCursor), "    ");
+		m_primaryCursor.column += 4;
 
-		resetSecondaryCursor();
+		m_secondaryCursor = m_primaryCursor;
 	}
 
 	std::vector<int> TextBox::getNewlineIndices()
@@ -326,40 +318,28 @@ namespace rgl
 		return row < (int)newlineIDs.size() - 1 ? newlineIDs[row + 1] - (newlineIDs[row] + 1) : 0;
 	}
 
-	int TextBox::getCursorIndex(int row, int column)
+	int TextBox::getCursorIndex(Cursor& cursor)
 	{
 		std::vector<int> newlineIDs = getNewlineIndices();
-		return newlineIDs[row] + column;
-	}
-
-	void TextBox::resetPrimaryCursor()
-	{
-		m_primaryRow = m_secondaryRow;
-		m_primaryColumn = m_secondaryColumn;
-	}
-
-	void TextBox::resetSecondaryCursor()
-	{
-		m_secondaryRow = m_primaryRow;
-		m_secondaryColumn = m_primaryColumn;
+		return newlineIDs[cursor.row] + cursor.column;
 	}
 
 	void TextBox::clearSelection()
 	{
-		int primaryCursorIndex = getCursorIndex(m_primaryRow, m_primaryColumn);
-		int secondaryCursorIndex = getCursorIndex(m_secondaryRow, m_secondaryColumn);
+		int primaryCursorIndex = getCursorIndex(m_primaryCursor);
+		int secondaryCursorIndex = getCursorIndex(m_secondaryCursor);
 
 		m_text.erase(m_text.begin() + min(primaryCursorIndex, secondaryCursorIndex), m_text.begin() + max(primaryCursorIndex, secondaryCursorIndex));
 
 		if (secondaryCursorIndex < primaryCursorIndex)
-			resetPrimaryCursor();
+			m_primaryCursor = m_secondaryCursor;
 		else
-			resetSecondaryCursor();
+			m_secondaryCursor = m_primaryCursor;
 	}
 
 	bool TextBox::isSelecting()
 	{
-		return m_secondaryRow != m_primaryRow || m_secondaryColumn != m_primaryColumn;
+		return m_secondaryCursor != m_primaryCursor;
 	}
 
 	void TextBox::setText(std::string text)
