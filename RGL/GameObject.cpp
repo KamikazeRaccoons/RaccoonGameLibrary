@@ -1,9 +1,23 @@
 #include "GameObject.h"
 #include "FontManager.h"
 #include "Level.h"
+#include "Game.h"
 
 namespace rgl
 {
+	void GameObject::onCreate()
+	{
+		FontManager::get()->compileText(m_name, m_name, 0, 255, 0, 127);
+
+		m_debugRect.w = FontManager::get()->getTextWidth(m_name);
+		m_debugRect.h = FontManager::get()->getTextHeight(m_name);
+	}
+
+	void GameObject::onDestroy()
+	{
+		FontManager::get()->freeText(m_name);
+	}
+
 	void GameObject::setParentLevel(std::shared_ptr<Level> pParentLevel)
 	{
 		if (!m_pLevel)
@@ -27,7 +41,11 @@ namespace rgl
 
 	void GameObject::debugDrawName()
 	{
-		FontManager::get()->draw(m_name, m_pLevel->toLevelPositionX(getX()), m_pLevel->toLevelPositionY(getY()),
-			0, 255, 0, 127, 0, 0, 0, 127);
+		m_debugRect.x = m_pLevel->toLevelPositionX(getX());
+		m_debugRect.y = m_pLevel->toLevelPositionY(getY());
+		
+		SDL_SetRenderDrawColor(Game::get()->getRenderer(), 0, 0, 0, 127);
+		SDL_RenderFillRect(Game::get()->getRenderer(), &m_debugRect);
+		FontManager::get()->drawText(m_name, m_debugRect.x, m_debugRect.y);
 	}
 }

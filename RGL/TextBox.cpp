@@ -17,18 +17,8 @@ namespace rgl
 		m_br(br), m_bg(bg), m_bb(bb), m_ba(ba),
 		m_fontID(fontID)
 	{
-		Vector2 charSize = FontManager::get()->getCharacterSize(fontID);
-		m_charWidth = (int)charSize.getX();
-		m_charHeight = (int)charSize.getY();
-	}
-
-	void TextBox::onCreate()
-	{
-		SDL_StartTextInput();
-	}
-
-	void TextBox::onDestroy()
-	{
+		m_charWidth = FontManager::get()->getCharWidth(fontID);
+		m_charHeight = FontManager::get()->getCharHeight(fontID);
 	}
 
 	void TextBox::update()
@@ -171,7 +161,7 @@ namespace rgl
 			SDL_RenderFillRect(Game::get()->getRenderer(), &primaryCursorRect);
 		}
 
-		FontManager::get()->draw(m_fontID, m_text, m_x, m_y, m_fr, m_fg, m_fb, m_fa, 0, 0, 0, 0);
+		FontManager::get()->drawText(m_fontID, m_text, m_x, m_y, m_fr, m_fg, m_fb, m_fa);
 	}
 
 	void TextBox::onDownPressed()

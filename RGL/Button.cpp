@@ -7,6 +7,8 @@ namespace rgl
 {
 	void Button::onCreate()
 	{
+		GameObject::onCreate();
+
 		m_callback = m_pLevel->getCallback(m_callbackID);
 	}
 

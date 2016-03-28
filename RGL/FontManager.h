@@ -2,10 +2,12 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include <SDL_ttf.h>
 
 #include "Vector2.h"
+#include "Debugger.h"
 
 namespace rgl
 {
@@ -13,9 +15,73 @@ namespace rgl
 	{
 	private:
 
+		class FontData
+		{
+		private:
+
+			TTF_Font* m_pFont;
+
+			int m_charWidth;
+			int m_charHeight;
+
+		public:
+
+			FontData(std::string file, int ptsize)
+			{
+				m_pFont = TTF_OpenFont(file.c_str(), ptsize);
+
+				if (m_pFont == 0)
+					Debugger::get()->log("Could not load font file \"" + file + "\"", Debugger::WARNING);
+				else
+					TTF_SizeText(m_pFont, " ", &m_charWidth, &m_charHeight);
+			}
+
+			~FontData()
+			{
+				TTF_CloseFont(m_pFont);
+			}
+
+			TTF_Font* getFont() { return m_pFont; }
+
+			int getCharWidth() { return m_charWidth; }
+			int getCharHeight() { return m_charHeight; }
+
+		};
+
+		class TextData
+		{
+		private:
+
+			SDL_Texture* m_pTexture;
+
+			int m_textWidth;
+			int m_textHeight;
+
+		public:
+
+			TextData(SDL_Texture* pTexture)
+			{
+				m_pTexture = pTexture;
+				SDL_QueryTexture(m_pTexture, NULL, NULL, &m_textWidth, &m_textHeight);
+			}
+
+			~TextData()
+			{
+				SDL_DestroyTexture(m_pTexture);
+			}
+
+			SDL_Texture* getTexture() { return m_pTexture; }
+
+			int getTextWidth() { return m_textWidth; }
+			int getTextHeight() { return m_textHeight; }
+		};
+
 		static FontManager* m_pInstance;
 
-		std::map<std::string, TTF_Font*> m_fonts;
+		const std::string m_TEMPKEY = "temp";
+
+		std::map<std::string, std::shared_ptr<FontData>> m_fontData;
+		std::map<std::string, std::shared_ptr<TextData>> m_textData;
 
 		std::string m_defaultFont;
 
@@ -24,14 +90,22 @@ namespace rgl
 		static FontManager* get();
 
 		void init();
-		void load(std::string file, int ptsize, std::string name);
-		void unload(std::string name);
-		void clear();
-		void draw(std::string name, std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR = 0, int bgG = 0, int bgB = 0, int bgA = 0,
-			int* width = 0, int* height = 0);
-		void draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR = 0, int bgG = 0, int bgB = 0, int bgA = 0,
-			int* width = 0, int* height = 0);
 
-		Vector2 getCharacterSize(std::string name);
+		void loadFont(std::string file, int ptsize, std::string name);
+		void unloadFont(std::string name);
+		void clearFonts();
+
+		void compileText(std::string key, std::string font, std::string text, int r, int g, int b, int a);
+		void compileText(std::string key, std::string text, int r, int g, int b, int a);
+		void drawText(std::string textKey, int x, int y);
+		void drawText(std::string font, std::string text, int x, int y, int r, int g, int b, int a);
+		void drawText(std::string text, int x, int y, int r, int g, int b, int a);
+		void freeText(std::string key);
+
+		int getCharWidth(std::string textKey);
+		int getCharHeight(std::string textKey);
+
+		int getTextWidth(std::string textKey);
+		int getTextHeight(std::string textKey);
 	};
 }

@@ -1,5 +1,4 @@
 #include "FontManager.h"
-#include "Debugger.h"
 #include "Game.h"
 
 namespace rgl
@@ -20,89 +19,108 @@ namespace rgl
 			TTF_Init();
 	}
 
-	void FontManager::load(std::string file, int ptsize, std::string name)
+	void FontManager::loadFont(std::string file, int ptsize, std::string name)
 	{
-		TTF_Font* pFont = TTF_OpenFont(file.c_str(), ptsize);
+		std::shared_ptr<FontData> pFontData = std::make_shared<FontData>(file, ptsize);
 
-		if (pFont == 0)
-		{
-			Debugger::get()->log("Could not load font file \"" + file + "\"", Debugger::WARNING);
-		}
-		else
-		{
-			if (m_fonts.size() == 0)
-				m_defaultFont = name;
-
-			m_fonts[name] = TTF_OpenFont(file.c_str(), ptsize);
-		}
-	}
-
-	void FontManager::unload(std::string name)
-	{
-		TTF_CloseFont(m_fonts[name]);
-	}
-
-	void FontManager::clear()
-	{
-		for (auto font : m_fonts)
-			TTF_CloseFont(font.second);
-
-		m_fonts.clear();
-	}
-
-	void FontManager::draw(std::string name, std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA, int* width, int* height)
-	{
-		if (text.empty() || m_fonts.find(name) == m_fonts.end())
+		if (pFontData->getFont() == 0)
 			return;
 
-		SDL_Color fgColor;
-		fgColor.r = fgR;
-		fgColor.g = fgG;
-		fgColor.b = fgB;
+		if (m_fontData.size() == 0)
+			m_defaultFont = name;
 
-		SDL_Surface* pTextSurface = TTF_RenderText_Blended_Wrapped(m_fonts[name], text.c_str(), fgColor, Game::get()->getWidth());
+		m_fontData[name] = pFontData;
+	}
 
+	void FontManager::unloadFont(std::string name)
+	{
+		m_fontData.erase(name);
+	}
+
+	void FontManager::clearFonts()
+	{
+		m_fontData.clear();
+	}
+
+	void FontManager::compileText(std::string key, std::string font, std::string text, int r, int g, int b, int a)
+	{
+		if (text.empty() || m_fontData.find(font) == m_fontData.end() && key != m_TEMPKEY)
+			return;
+
+		SDL_Color textColor;
+		textColor.r = r;
+		textColor.g = g;
+		textColor.b = b;
+
+		SDL_Surface* pTextSurface = TTF_RenderText_Blended_Wrapped(m_fontData[font]->getFont(), text.c_str(), textColor, Game::get()->getWidth());
 		SDL_Texture* pTextTexture = SDL_CreateTextureFromSurface(Game::get()->getRenderer(), pTextSurface);
+		SDL_FreeSurface(pTextSurface);
+		SDL_SetTextureAlphaMod(pTextTexture, a);
 
-		SDL_QueryTexture(pTextTexture, NULL, NULL, width, height);
+		m_textData[key] = std::make_shared<TextData>(pTextTexture);
+	}
 
-		SDL_SetTextureAlphaMod(pTextTexture, fgA);
+	void FontManager::compileText(std::string key, std::string text, int r, int g, int b, int a)
+	{
+		if (m_fontData.size() > 0)
+			compileText(key, m_defaultFont, text, r, g, b, a);
+	}
+
+	void FontManager::drawText(std::string textKey, int x, int y)
+	{
+		if (m_textData.find(textKey) == m_textData.end())
+			return;
+
+		std::shared_ptr<TextData> textData = m_textData[textKey];
 
 		SDL_Rect srcRect;
 		SDL_Rect dstRect;
 
 		srcRect.x = 0;
 		srcRect.y = 0;
-		srcRect.w = dstRect.w = pTextSurface->w;
-		srcRect.h = dstRect.h = pTextSurface->h;
+		srcRect.w = dstRect.w = textData->getTextWidth();
+		srcRect.h = dstRect.h = textData->getTextHeight();
 		dstRect.x = x;
 		dstRect.y = y;
 
-		if (!(bgR == 0 && bgG == 0 && bgB == 0 && bgA == 0))
-		{
-			SDL_SetRenderDrawColor(Game::get()->getRenderer(), bgR, bgG, bgB, bgA);
-			SDL_RenderFillRect(Game::get()->getRenderer(), &dstRect);
-		}
-
-		SDL_RenderCopy(Game::get()->getRenderer(), pTextTexture, &srcRect, &dstRect);
-
-		SDL_FreeSurface(pTextSurface);
-		SDL_DestroyTexture(pTextTexture);
+		SDL_RenderCopy(Game::get()->getRenderer(), textData->getTexture(), &srcRect, &dstRect);
 	}
 
-	void FontManager::draw(std::string text, int x, int y, int fgR, int fgG, int fgB, int fgA, int bgR, int bgG, int bgB, int bgA, int* width, int* height)
+	void FontManager::drawText(std::string font, std::string text, int x, int y, int r, int g, int b, int a)
 	{
-		if (m_fonts.size() > 0)
-			draw(m_defaultFont, text, x, y, fgR, fgG, fgB, fgA, bgR, bgG, bgB, bgA, width, height);
+		compileText(m_TEMPKEY, font, text, r, g, b, a);
+		drawText(m_TEMPKEY, x, y);
+		freeText(m_TEMPKEY);
 	}
 
-	Vector2 FontManager::getCharacterSize(std::string name)
+	void FontManager::drawText(std::string text, int x, int y, int r, int g, int b, int a)
 	{
-		int width;
-		int height;
+		if (m_fontData.size() > 0)
+			drawText(m_defaultFont, text, x, y, r, g, b, a);
+	}
 
-		TTF_SizeText(m_fonts[name], " ", &width, &height);
+	void FontManager::freeText(std::string key)
+	{
+		m_textData.erase(key);
+	}
 
-		return Vector2((double)width, (double)height);
+	int FontManager::getTextWidth(std::string textKey)
+	{
+		return m_textData[textKey]->getTextWidth();
+	}
+
+	int FontManager::getTextHeight(std::string textKey)
+	{
+		return m_textData[textKey]->getTextHeight();
+	}
+
+	int FontManager::getCharWidth(std::string textKey)
+	{
+		return m_fontData[textKey]->getCharWidth();
+	}
+
+	int FontManager::getCharHeight(std::string textKey)
+	{
+		return m_fontData[textKey]->getCharHeight();
 	}
 }

@@ -7,6 +7,8 @@ namespace rgl
 {
 	void PhysicsObject::onCreate()
 	{
+		GameObject::onCreate();
+
 		b2BodyDef bodyDef;
 		bodyDef.type = m_bodyType;
 		bodyDef.position.Set(m_pLevel->toTileUnits(m_x + m_width / 2), m_pLevel->toTileUnits(m_y + m_height / 2));
@@ -16,6 +18,8 @@ namespace rgl
 
 	void PhysicsObject::onDestroy()
 	{
+		GameObject::onDestroy();
+
 		for (auto fixture : m_fixtures)
 			m_pBody->DestroyFixture(fixture);
 

@@ -74,9 +74,6 @@ namespace rgl
 			int br, int bg, int bb, int ba,
 			std::string fontID, std::string name = "(unnamed TextBox)");
 
-		virtual void onCreate();
-		virtual void onDestroy();
-
 		virtual void update();
 		virtual void draw();
 

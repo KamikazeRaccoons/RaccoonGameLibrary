@@ -6,6 +6,8 @@
 #include "ObjectParams.h"
 #include "Vector2.h"
 
+#include <SDL.h>
+
 namespace rgl
 {
 	class Level;
@@ -17,12 +19,14 @@ namespace rgl
 		std::shared_ptr<Level> m_pLevel;
 		std::string m_name;
 
+		SDL_Rect m_debugRect;
+
 	public:
 
 		GameObject(std::string name) : m_name(name) { }
 
-		virtual void onCreate() { };
-		virtual void onDestroy() { };
+		virtual void onCreate();
+		virtual void onDestroy();
 
 		virtual void update() { };
 		virtual void draw() { };
