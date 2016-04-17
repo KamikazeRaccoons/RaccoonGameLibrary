@@ -12,17 +12,23 @@ namespace rgl
 		int fr, int fg, int fb, int fa,
 		int br, int bg, int bb, int ba,
 		std::string fontID, std::string name)
-		: GameObject(name), m_enabled(enabled), m_x(x), m_y(y), m_width(width), m_height(height), m_cursorWidth(cursorWidth),
+		: GameObject(name), m_enabled(enabled), m_invalidated(false),
+		m_x(x), m_y(y), m_width(width), m_height(height), m_cursorWidth(cursorWidth),
 		m_fr(fr), m_fg(fg), m_fb(fb), m_fa(fa),
 		m_br(br), m_bg(bg), m_bb(bb), m_ba(ba),
-		m_fontID(fontID)
+		m_fontID(fontID), m_textID(m_name + "_text")
 	{
 		m_charWidth = FontManager::get()->getCharWidth(fontID);
 		m_charHeight = FontManager::get()->getCharHeight(fontID);
+
+		m_primaryCursor.row = m_primaryCursor.column = 0;
+		m_secondaryCursor = m_primaryCursor;
 	}
 
 	void TextBox::update()
 	{
+		m_oldText = m_text;
+
 		if (!m_enabled)
 			return;
 
@@ -161,7 +167,21 @@ namespace rgl
 			SDL_RenderFillRect(Game::get()->getRenderer(), &primaryCursorRect);
 		}
 
-		FontManager::get()->drawText(m_fontID, m_text, m_x, m_y, m_fr, m_fg, m_fb, m_fa);
+		if (isTextModified() || !FontManager::get()->isTextCached(m_textID))
+		{
+			Debugger::get()->log("Text was modified!");
+			FontManager::get()->cacheText(m_textID, m_fontID, m_text, m_fr, m_fg, m_fb, m_fa);
+		}
+
+		FontManager::get()->drawText(m_textID, m_x, m_y);
+
+		m_invalidated = false;
+	}
+
+	void TextBox::onDestroy()
+	{
+		GameObject::onDestroy();
+		FontManager::get()->freeText(m_textID);
 	}
 
 	void TextBox::onDownPressed()
@@ -327,9 +347,19 @@ namespace rgl
 			m_secondaryCursor = m_primaryCursor;
 	}
 
+	void TextBox::invalidate()
+	{
+		m_invalidated = true;
+	}
+
 	bool TextBox::isSelecting()
 	{
 		return m_secondaryCursor != m_primaryCursor;
+	}
+
+	bool TextBox::isTextModified()
+	{
+		return m_oldText != m_text || m_invalidated;
 	}
 
 	void TextBox::setText(std::string text)

@@ -7,7 +7,7 @@ namespace rgl
 {
 	void GameObject::onCreate()
 	{
-		FontManager::get()->compileText(m_name, m_name, 0, 255, 0, 127);
+		FontManager::get()->cacheText(m_name, m_name, 0, 255, 0, 127);
 
 		m_debugRect.w = FontManager::get()->getTextWidth(m_name);
 		m_debugRect.h = FontManager::get()->getTextHeight(m_name);

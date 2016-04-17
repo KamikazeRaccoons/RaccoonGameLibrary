@@ -21,7 +21,7 @@ namespace rgl
 
 		return m_pInstance;
 	}
-
+	
 	void InputHandler::onMouseButtonDown(SDL_Event& event)
 	{
 		switch (event.button.button)

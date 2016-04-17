@@ -42,9 +42,9 @@ namespace rgl
 		m_fontData.clear();
 	}
 
-	void FontManager::compileText(std::string key, std::string font, std::string text, int r, int g, int b, int a)
+	void FontManager::cacheText(std::string key, std::string font, std::string text, int r, int g, int b, int a)
 	{
-		if (text.empty() || m_fontData.find(font) == m_fontData.end() && key != m_TEMPKEY)
+		if (m_fontData.find(font) == m_fontData.end() && key != m_TEMPKEY)
 			return;
 
 		SDL_Color textColor;
@@ -60,18 +60,18 @@ namespace rgl
 		m_textData[key] = std::make_shared<TextData>(pTextTexture);
 	}
 
-	void FontManager::compileText(std::string key, std::string text, int r, int g, int b, int a)
+	void FontManager::cacheText(std::string key, std::string text, int r, int g, int b, int a)
 	{
 		if (m_fontData.size() > 0)
-			compileText(key, m_defaultFont, text, r, g, b, a);
+			cacheText(key, m_defaultFont, text, r, g, b, a);
 	}
 
-	void FontManager::drawText(std::string textKey, int x, int y)
+	void FontManager::drawText(std::string key, int x, int y)
 	{
-		if (m_textData.find(textKey) == m_textData.end())
+		if (m_textData.find(key) == m_textData.end())
 			return;
 
-		std::shared_ptr<TextData> textData = m_textData[textKey];
+		std::shared_ptr<TextData> textData = m_textData[key];
 
 		SDL_Rect srcRect;
 		SDL_Rect dstRect;
@@ -88,7 +88,7 @@ namespace rgl
 
 	void FontManager::drawText(std::string font, std::string text, int x, int y, int r, int g, int b, int a)
 	{
-		compileText(m_TEMPKEY, font, text, r, g, b, a);
+		cacheText(m_TEMPKEY, font, text, r, g, b, a);
 		drawText(m_TEMPKEY, x, y);
 		freeText(m_TEMPKEY);
 	}
@@ -102,6 +102,11 @@ namespace rgl
 	void FontManager::freeText(std::string key)
 	{
 		m_textData.erase(key);
+	}
+
+	bool FontManager::isTextCached(std::string key)
+	{
+		return m_textData.find(key) != m_textData.end();
 	}
 
 	int FontManager::getTextWidth(std::string textKey)

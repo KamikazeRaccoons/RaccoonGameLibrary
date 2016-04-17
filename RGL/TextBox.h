@@ -23,6 +23,7 @@ namespace rgl
 		Cursor m_secondaryCursor;
 
 		bool m_enabled;
+		bool m_invalidated;
 
 		int m_x;
 		int m_y;
@@ -41,6 +42,8 @@ namespace rgl
 		int m_ba;
 
 		std::string m_fontID;
+		std::string m_textID;
+		std::string m_oldText;
 		std::string m_text;
 
 		int m_cursorWidth;
@@ -64,8 +67,10 @@ namespace rgl
 		int getCursorIndex(Cursor &cursor);
 
 		void clearSelection();
+		void invalidate();
 
 		bool isSelecting();
+		bool isTextModified();
 
 	public:
 
@@ -76,6 +81,7 @@ namespace rgl
 
 		virtual void update();
 		virtual void draw();
+		virtual void onDestroy();
 
 		virtual int getX() { return m_x; };
 		virtual int getY() { return m_y; };

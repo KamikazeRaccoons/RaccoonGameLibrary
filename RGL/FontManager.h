@@ -95,12 +95,14 @@ namespace rgl
 		void unloadFont(std::string name);
 		void clearFonts();
 
-		void compileText(std::string key, std::string font, std::string text, int r, int g, int b, int a);
-		void compileText(std::string key, std::string text, int r, int g, int b, int a);
-		void drawText(std::string textKey, int x, int y);
+		void cacheText(std::string key, std::string font, std::string text, int r, int g, int b, int a);
+		void cacheText(std::string key, std::string text, int r, int g, int b, int a);
+		void drawText(std::string key, int x, int y);
 		void drawText(std::string font, std::string text, int x, int y, int r, int g, int b, int a);
 		void drawText(std::string text, int x, int y, int r, int g, int b, int a);
 		void freeText(std::string key);
+
+		bool isTextCached(std::string key);
 
 		int getCharWidth(std::string textKey);
 		int getCharHeight(std::string textKey);
